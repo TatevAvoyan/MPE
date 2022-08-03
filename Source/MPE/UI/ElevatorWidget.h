@@ -1,0 +1,79 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Blueprint/UserWidget.h"
+#include "Button/GetButton.h"
+#include "ElevatorWidget.generated.h"
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnOpenClicked, class AMPECharacter*, Character);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnFloorButtonClicked, class AMPECharacter*, Character, int32, ClickedButtonNumber);
+
+class UButton;
+class AShaft;
+
+UCLASS()
+class MPE_API UElevatorWidget : public UUserWidget
+{
+	GENERATED_BODY()
+	
+public:
+	virtual void NativeOnInitialized() override;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UGetButton> Button_1;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UGetButton> Button_2;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UGetButton> Button_3;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UGetButton> Button_4;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UGetButton> Button_5;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UGetButton> Button_6;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UGetButton> Button_7;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UGetButton> Button_8;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UButton> OpenShaftDoorsButton;
+
+public:
+	UPROPERTY()
+	TObjectPtr<APlayerController> PlayerController = nullptr;
+
+	UFUNCTION(Client, Reliable)
+	void Client_OpenDoorsOpenButtonClicked();
+
+	UFUNCTION(Client, Reliable)
+	void Client_ButtonClicked(const class UButton* CurrentButton);
+
+	UFUNCTION(Server, Reliable)
+	void Server_OpenDoorsOpenButtonClicked();
+
+	UFUNCTION(Server, Reliable)
+	void Server_ButtonClicked(const class UButton* CurrentButton);
+
+	UPROPERTY(BlueprintAssignable)
+	FOnOpenClicked OnOpenButtonClicked;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnFloorButtonClicked OnFloorButtonClicked;
+
+	UPROPERTY()
+	int32 ButtonNumber = 0;
+
+private:
+	UPROPERTY()
+	TObjectPtr<class AMPECharacter> MyCharacter;
+};
