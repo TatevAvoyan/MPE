@@ -85,8 +85,8 @@ public:
 	FOnEnterKeyb OnEnterKeyb;
 
 public:
-	UFUNCTION()
-	void ShowWidget();
+	UFUNCTION(Client, Reliable)
+	void Client_ShowWidget();
 
 	UFUNCTION(Server, Reliable)
 	void Server_InteractPressed();

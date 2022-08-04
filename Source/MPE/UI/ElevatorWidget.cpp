@@ -9,12 +9,13 @@
 void UElevatorWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
+
 	MyCharacter = Cast<AMPECharacter>(GetOwningPlayer()->GetCharacter());
 	PlayerController = Cast<APlayerController>(GetOwningPlayer());
 
 	if (IsValid(OpenShaftDoorsButton))
 	{
-		OpenShaftDoorsButton->OnClicked.AddUniqueDynamic(this, &UElevatorWidget::Client_OpenDoorsOpenButtonClicked);
+		// OpenShaftDoorsButton->OnClicked.AddUniqueDynamic(this, &UElevatorWidget::Client_OpenDoorsOpenButtonClicked);
 		OpenShaftDoorsButton->OnClicked.AddUniqueDynamic(this, &UElevatorWidget::Server_OpenDoorsOpenButtonClicked);
 	}
 
@@ -73,14 +74,8 @@ void UElevatorWidget::Server_OpenDoorsOpenButtonClicked_Implementation()
 	{
 		OnOpenButtonClicked.Broadcast(MyCharacter);
 	}
-}
 
-void UElevatorWidget::Server_ButtonClicked_Implementation(const UButton* CurrentButton)
-{
-	if (OnFloorButtonClicked.IsBound())
-	{
-		OnFloorButtonClicked.Broadcast(MyCharacter, ButtonNumber);
-	}
+	Client_OpenDoorsOpenButtonClicked();
 }
 
 void UElevatorWidget::Client_OpenDoorsOpenButtonClicked_Implementation()
@@ -103,6 +98,15 @@ void UElevatorWidget::Client_OpenDoorsOpenButtonClicked_Implementation()
 		MyCharacter->HintWigetRef->AddToViewport(0);
 	}
 }
+
+void UElevatorWidget::Server_ButtonClicked_Implementation(const UButton* CurrentButton)
+{
+	if (OnFloorButtonClicked.IsBound())
+	{
+		OnFloorButtonClicked.Broadcast(MyCharacter, ButtonNumber);
+	}
+}
+
 
 void UElevatorWidget::Client_ButtonClicked_Implementation(const UButton* CurrentButton)
 {

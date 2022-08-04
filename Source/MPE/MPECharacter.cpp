@@ -6,6 +6,7 @@
 #include "Components/InputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
+#include "GameFramework/PlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/Button.h"
 #include "Kismet/GameplayStatics.h"
@@ -125,7 +126,7 @@ void AMPECharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInput
 	PlayerInputComponent->BindTouch(IE_Released, this, &AMPECharacter::TouchStopped);
 
 	// Shows Elevator floors widget Key R 
-	PlayerInputComponent->BindAction("ElevatorWidget", IE_Pressed, this, &AMPECharacter::ShowWidget);
+	PlayerInputComponent->BindAction("ElevatorWidget", IE_Pressed, this, &AMPECharacter::Client_ShowWidget);
 	// LineTrace Key E 
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AMPECharacter::Server_InteractPressed);
 	// changes the camera from first person to third person and vice versa Key V
@@ -221,18 +222,17 @@ void AMPECharacter::CameraSwitch()
 }
 
 // Shows an elevator widget when the player presses the R button
-void AMPECharacter::ShowWidget()
+void AMPECharacter::Client_ShowWidget_Implementation()
 {
 	if (IsValid(FloorNumbersWidget) && bCanShow)
 	{
-		PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-		auto a = GetController();
-		GetController();
+		PlayerController = Cast<APlayerController>(GetOwner());
 		if (PlayerController)
 		{
 			PlayerController->SetInputMode(FInputModeUIOnly());
 			PlayerController->bShowMouseCursor = true;
 		}
+
 		if (IsValid(HintWigetRef))
 		{
 			HintWigetRef->RemoveFromParent();

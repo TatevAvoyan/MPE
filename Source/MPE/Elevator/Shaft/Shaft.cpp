@@ -41,7 +41,7 @@ void AShaft::BeginPlay()
 		FOnTimelineFloat TimeLineProgress{};
 		TimeLineProgress.BindUFunction(this, FName("HandleProgress"));
 
-		DoorsTimeline.AddInterpFloat(DoorsCurve, TimeLineProgress);
+		this->DoorsTimeline.AddInterpFloat(DoorsCurve, TimeLineProgress);
 	}
 }
 
@@ -49,7 +49,7 @@ void AShaft::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	DoorsTimeline.TickTimeline(DeltaTime);
+	this->DoorsTimeline.TickTimeline(DeltaTime);
 }
 
 void AShaft::OnConstruction(const FTransform& Transform)
@@ -70,12 +70,12 @@ void AShaft::OpenDoors_Implementation(AMPECharacter* BaseCharacter)
 {
 	CuurentIndex = BaseCharacter->FloorNumbersWidget->ButtonNumber;
 
-	ShaftArr[CuurentIndex]->DoorsTimeline.Play();
+	this->DoorsTimeline.Play();
 }
 
 void AShaft::CloseDoors_Implementation()
 {
-	ShaftArr[CuurentIndex]->DoorsTimeline.Reverse();
+	DoorsTimeline.Reverse();
 }
 
 void AShaft::HandleProgress_Implementation(float value)
@@ -101,5 +101,5 @@ void AShaft::OnComponentBeginOverlap_Implementation(UPrimitiveComponent* Overlap
 
 void AShaft::OnComponentEndOverlap_Implementation(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	ShaftArr[CuurentIndex]->DoorsTimeline.Reverse();
+	this->DoorsTimeline.Reverse();
 }
