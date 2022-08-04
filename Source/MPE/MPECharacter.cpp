@@ -260,11 +260,6 @@ void AMPECharacter::Server_InteractPressed_Implementation()
 	bHit = UKismetSystemLibrary::LineTraceSingleForObjects(this, Start, End, TraceObjectTypes, false, ActorsToIgnore,
 		EDrawDebugTrace::ForDuration, HitResult, true, FLinearColor::Red, FLinearColor::Green, 3.0f);
 
-	Multi_InteractPressed();
-}
-
-void AMPECharacter::Multi_InteractPressed_Implementation()
-{
 	if (bHit)
 	{
 		if (OnOverlaped.IsBound())
@@ -272,4 +267,15 @@ void AMPECharacter::Multi_InteractPressed_Implementation()
 			OnOverlaped.Broadcast(this);
 		}
 	}
+}
+
+void AMPECharacter::Multi_InteractPressed_Implementation()
+{
+	/*if (bHit)
+	{
+		if (OnOverlaped.IsBound())
+		{
+			OnOverlaped.Broadcast(this);
+		}
+	}*/
 }

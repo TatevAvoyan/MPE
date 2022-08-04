@@ -24,7 +24,8 @@ public class MPE : ModuleRules
             "MPE/Elevator",
             "MPE/Elevator/Shaft",
             "MPE/UI",
-            "MPE/UI/Button"
+            "MPE/UI/Button",
+            "MPE/Interface"
         });
     }
 }

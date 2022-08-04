@@ -130,7 +130,7 @@ void AElevator::OnOverlapBegin_Implementation(UPrimitiveComponent* OverlappedCom
 	{
 		if (IsValid(Character->HintWigetRef))
 		{
-			Character->HintWigetRef->AddToViewport(0);
+			Character->HintWigetRef->AddToViewport();
 		}
 
 		if (IsValid(Character->FloorNumbersWidget))
@@ -152,7 +152,7 @@ void AElevator::OnOverlapEnd_Implementation(UPrimitiveComponent* OverlappedCompo
 
 		if (IsValid(Character->HintWigetRef))
 		{
-			Character->HintWigetRef->RemoveFromParent();
+			Character->HintWigetRef->SetVisibility(ESlateVisibility::Collapsed);
 		}
 	}
 }
@@ -164,6 +164,7 @@ void AElevator::Server_MoveElevator_Implementation(AMPECharacter* Character, int
 	FVector ActorLocation = Elevator->GetComponentLocation();
 	ElevatorCurrentLocation = Elevator->GetComponentLocation();
 
+	
 	ActorLocation.Z = 300 * (TargetFloor - CurrentFloor) + 0.2f;
 
 	ElevatorTargetLocation = ActorLocation;
@@ -199,4 +200,9 @@ void AElevator::HandleElevatorDoorsOpenProgress_Implementation(float value)
 	FVector NewLeftDoorLocation = FMath::Lerp(LeftDoorInitLocation, LeftDoorTargetLocation, value);
 	ElevatorDoorRight->SetRelativeLocation(NewRightDoorLocation);
 	ElevatorDoorLeft->SetRelativeLocation(NewLeftDoorLocation);
+}
+
+AElevator* AElevator::GetElevatorRef_Implementation()
+{
+	return this;
 }

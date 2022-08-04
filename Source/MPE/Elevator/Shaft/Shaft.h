@@ -28,6 +28,10 @@ private:
 	UFUNCTION(NetMulticast, Reliable)
 	void OpenDoors(class AMPECharacter* BaseCharacter);
 
+	// Opens Elevator & shaft doors
+	UFUNCTION(NetMulticast, Reliable)
+	void OutsideOpenDoors(class AMPECharacter* BaseCharacter);
+
 	// Closes Elevator & shaft doors
 	UFUNCTION(NetMulticast, Reliable)
 	void CloseDoors();
@@ -114,6 +118,12 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "ShaftArr")
 	TArray<class AShaft*> ShaftArr;
 
-	UPROPERTY(EditAnywhere, Category = "Shaft Ref")
+	UPROPERTY(EditDefaultsOnly, Category = "ElevatorSub")
+	TSubclassOf<class AElevator> ElevatorSub;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shaft Ref")
+	AElevator* ElevatorObj;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shaft Ref")
 	TObjectPtr<class AElevator> ElevatorRef;
 };

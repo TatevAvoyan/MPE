@@ -58,10 +58,10 @@ public:
 	UFUNCTION(Client, Reliable)
 	void Client_ButtonClicked(const class UButton* CurrentButton);
 
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(NetMulticast, Reliable)
 	void Server_OpenDoorsOpenButtonClicked();
 
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(NetMulticast, Reliable)
 	void Server_ButtonClicked(const class UButton* CurrentButton);
 
 	UPROPERTY(BlueprintAssignable)

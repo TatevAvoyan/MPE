@@ -3,10 +3,11 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/TimelineComponent.h"
+#include "MPE/Interface/MyInterface.h"
 #include "Elevator.generated.h"
 
 UCLASS()
-class MPE_API AElevator : public AActor
+class MPE_API AElevator : public AActor, public IMyInterface
 {
 	GENERATED_BODY()
 	
@@ -49,18 +50,22 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 	void HandleElevatorMoveProgress(float value);
 
+public:
 	UPROPERTY(EditDefaultsOnly, Category = "Timeline")
 	FTimeline ElevatorCurveTimeLine;
 
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Timeline")
 	TObjectPtr<class UCurveFloat> ElevatorCurveFloat;
 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	class AElevator* GetElevatorRef();
+
 protected:
 	// Elevator Doors Open/Close functions & Variables
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(NetMulticast, Reliable)
 	void Multi_OpenDoors(class AMPECharacter* Character);
 
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(NetMulticast, Reliable)
 	void Multi_CloseDoors();
 
 	UFUNCTION(NetMulticast, Reliable)
@@ -113,7 +118,7 @@ protected:
 	// Boxes End
 
 	UPROPERTY(EditDefaultsOnly, Category = "Floor", meta = (ClampMin = 1, ClampMax = 8))
-	int32 CurrentFloor;
+	int32 CurrentFloor = 1;
 
 protected:
 	// Meshes

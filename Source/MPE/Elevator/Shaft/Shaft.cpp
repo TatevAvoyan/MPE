@@ -66,11 +66,22 @@ void AShaft::OnConstruction(const FTransform& Transform)
 	ShaftInnerBox->SetRelativeLocation(ShaftBoxInitLocation);
 }
 
+void AShaft::OutsideOpenDoors_Implementation(AMPECharacter* BaseCharacter)
+{
+	DoorsTimeline.Play();
+}
+
 void AShaft::OpenDoors_Implementation(AMPECharacter* BaseCharacter)
 {
 	CuurentIndex = BaseCharacter->FloorNumbersWidget->ButtonNumber;
 
-	this->DoorsTimeline.Play();
+
+	//ShaftArr[CuurentIndex]->DoorsTimeline.Play();
+
+	if (IsValid(ElevatorRef) && !ElevatorRef->ElevatorCurveTimeLine.IsPlaying() && !ShaftArr.IsEmpty())
+	{
+		ShaftArr[CuurentIndex]->DoorsTimeline.Play();
+	}
 }
 
 void AShaft::CloseDoors_Implementation()
@@ -91,7 +102,7 @@ void AShaft::OnComponentBeginOverlap_Implementation(UPrimitiveComponent* Overlap
 	CharacterBase = Cast<AMPECharacter>(OtherActor);
 	if (IsValid(CharacterBase))
 	{
-		CharacterBase->OnOverlaped.AddUniqueDynamic(this, &AShaft::OpenDoors);
+		CharacterBase->OnOverlaped.AddUniqueDynamic(this, &AShaft::OutsideOpenDoors);
 		if (IsValid(CharacterBase->FloorNumbersWidget))
 		{
 			CharacterBase->FloorNumbersWidget->OnOpenButtonClicked.AddUniqueDynamic(this, &AShaft::OpenDoors);
@@ -101,5 +112,14 @@ void AShaft::OnComponentBeginOverlap_Implementation(UPrimitiveComponent* Overlap
 
 void AShaft::OnComponentEndOverlap_Implementation(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
+	CharacterBase = Cast<AMPECharacter>(OtherActor);
+	if (IsValid(CharacterBase))
+	{
+		CharacterBase->OnOverlaped.RemoveDynamic(this, &AShaft::OutsideOpenDoors);
+		if (IsValid(CharacterBase->FloorNumbersWidget))
+		{
+			//CharacterBase->FloorNumbersWidget->OnOpenButtonClicked.RemoveDynamic(this, &AShaft::OpenDoors);
+		}
+	}
 	this->DoorsTimeline.Reverse();
 }
