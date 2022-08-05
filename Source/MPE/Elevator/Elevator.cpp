@@ -107,10 +107,10 @@ void AElevator::OnBeginOverlap_Implementation(UPrimitiveComponent* OverlappedCom
 
 	if (IsValid(CharacterBase))
 	{
-		CharacterBase->OnOverlaped.AddUniqueDynamic(this, &AElevator::Multi_OpenDoors);
+		CharacterBase->OnOverlaped.AddUniqueDynamic(this, &AElevator::CallBack_OpenDoors);
 		if (IsValid(CharacterBase->FloorNumbersWidget))
 		{
-			CharacterBase->FloorNumbersWidget->OnOpenButtonClicked.AddUniqueDynamic(this, &AElevator::Multi_OpenDoors);
+			CharacterBase->FloorNumbersWidget->OnOpenButtonClicked.AddUniqueDynamic(this, &AElevator::CallBack_OpenDoors);
 		}
 	}
 }
@@ -118,7 +118,7 @@ void AElevator::OnBeginOverlap_Implementation(UPrimitiveComponent* OverlappedCom
 // ElevatorOuterBox End Overlap Callback Functions
 void AElevator::OnEndOverlap_Implementation(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	Multi_CloseDoors();
+	Server_CloseDoors();
 }
 
 // ElevatorInnerBox Begin Overlap Callback Functions
@@ -129,15 +129,11 @@ void AElevator::OnOverlapBegin_Implementation(UPrimitiveComponent* OverlappedCom
 
 	if (IsValid(Character))
 	{
-		if (IsValid(Character->HintWigetRef))
-		{
-			Character->HintWigetRef->AddToViewport();
-		}
+		Character->ShowHintWidget(true);
 
 		if (IsValid(Character->FloorNumbersWidget))
 		{
 			Character->FloorNumbersWidget->OnFloorButtonClicked.AddUniqueDynamic(this, &AElevator::Server_MoveElevator);
-			Character->bCanShow = true;
 		}
 	}
 }
@@ -149,12 +145,7 @@ void AElevator::OnOverlapEnd_Implementation(UPrimitiveComponent* OverlappedCompo
 	AMPECharacter* Character = Cast<AMPECharacter>(OtherActor);
 	if (IsValid(Character))
 	{
-		Character->bCanShow = false;
-
-		if (IsValid(Character->HintWigetRef))
-		{
-			Character->HintWigetRef->SetVisibility(ESlateVisibility::Collapsed);
-		}
+		Character->ShowHintWidget(false);
 	}
 }
 
@@ -164,7 +155,6 @@ void AElevator::Server_MoveElevator_Implementation(AMPECharacter* Character, int
 	FVector ActorLocation = Elevator->GetComponentLocation();
 	ElevatorCurrentLocation = Elevator->GetComponentLocation();
 
-	
 	ActorLocation.Z = 300 * (TargetFloor - CurrentFloor) + 0.2f;
 
 	ElevatorTargetLocation = ActorLocation;
@@ -184,12 +174,12 @@ void AElevator::HandleElevatorMoveProgress_Implementation(float value)
 	Elevator->SetWorldLocation(ElevatorNewLocation);
 }
 
-void AElevator::Multi_OpenDoors_Implementation(AMPECharacter* Character)
+void AElevator::Server_OpenDoors_Implementation(AMPECharacter* Character)
 {
 	DoorsCurveTimeLine.Play();
 }
 
-void AElevator::Multi_CloseDoors_Implementation()
+void AElevator::Server_CloseDoors_Implementation()
 {
 	DoorsCurveTimeLine.Reverse();
 }
@@ -205,4 +195,13 @@ void AElevator::HandleElevatorDoorsOpenProgress_Implementation(float value)
 AElevator* AElevator::GetElevatorRef_Implementation()
 {
 	return this;
+}
+
+void AElevator::CallBack_OpenDoors(AMPECharacter* Character)
+{
+	Server_OpenDoors(Character);
+}
+
+void AElevator::CallBack_CloseDoors()
+{
 }

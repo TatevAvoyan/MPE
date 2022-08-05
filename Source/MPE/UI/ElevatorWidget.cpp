@@ -5,12 +5,13 @@
 #include "MPE/MPECharacter.h"
 #include "Shaft.h"
 #include "Kismet/KismetStringLibrary.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 void UElevatorWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 
-	MyCharacter = Cast<AMPECharacter>(GetOwningPlayer());
+	MyCharacter = Cast<AMPECharacter>(GetOwningPlayer()->GetPawn());
 	PlayerController = Cast<APlayerController>(GetOwningPlayer());
 
 	if (IsValid(OpenShaftDoorsButton))
@@ -62,19 +63,13 @@ void UElevatorWidget::NativeOnInitialized()
 
 void UElevatorWidget::Server_OpenDoorsOpenButtonClicked_Implementation()
 {
-	if (OnOpenButtonClicked.IsBound())
-	{
-		OnOpenButtonClicked.Broadcast(MyCharacter);
-	}
-
-	Client_DeactivateMouse_RemoveWidget();
-
-	Client_HintWidget_AddToViewport();
+	Server_Call();
 }
 
 
 void UElevatorWidget::Server_ButtonClicked_Implementation(const UButton* CurrentButton)
 {
+	UKismetSystemLibrary::PrintString(this, "ButtonClicked");
 	Split_Conv_String(CurrentButton);
 
 	Client_DeactivateMouse_RemoveWidget();
@@ -108,6 +103,19 @@ void UElevatorWidget::Client_DeactivateMouse_RemoveWidget_Implementation()
 
 	// Removing From Viewport when Clicked Button
 	RemoveFromViewport();
+}
+
+void UElevatorWidget::Server_Call_Implementation()
+{
+	UKismetSystemLibrary::PrintString(this, "OpenDoorsOpenButtonClicked");
+	if (OnOpenButtonClicked.IsBound())
+	{
+		OnOpenButtonClicked.Broadcast(MyCharacter);
+	}
+
+	Client_DeactivateMouse_RemoveWidget();
+
+	Client_HintWidget_AddToViewport();
 }
 
 void UElevatorWidget::Client_HintWidget_AddToViewport_Implementation()

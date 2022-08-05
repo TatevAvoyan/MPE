@@ -55,11 +55,14 @@ public:
 	UFUNCTION()
 	void Split_Conv_String(const class UButton* CurrentButton);
 
-	UFUNCTION(NetMulticast, Unreliable)
+	UFUNCTION(Client, Unreliable)
 	void Server_OpenDoorsOpenButtonClicked();
 
 	UFUNCTION(NetMulticast, Unreliable)
 	void Server_ButtonClicked(const class UButton* CurrentButton);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void Server_Call();
 
 	UFUNCTION(Client, Unreliable)
 	void Client_DeactivateMouse_RemoveWidget();

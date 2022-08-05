@@ -47,7 +47,7 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 	void MoveElevator(class AMPECharacter* Character, int32 TargetFloor);
 
-	UFUNCTION(NetMulticast, Reliable)
+	UFUNCTION(Server, Reliable)
 	void HandleElevatorMoveProgress(float value);
 
 public:
@@ -62,16 +62,23 @@ public:
 
 protected:
 	// Elevator Doors Open/Close functions & Variables
-	UFUNCTION(NetMulticast, Reliable)
-	void Multi_OpenDoors(class AMPECharacter* Character);
+	UFUNCTION(Server, Reliable)
+	void Server_OpenDoors(class AMPECharacter* Character);
 
-	UFUNCTION(NetMulticast, Reliable)
-	void Multi_CloseDoors();
+	UFUNCTION(Server, Reliable)
+	void Server_CloseDoors();
 
-	UFUNCTION(NetMulticast, Reliable)
+	UFUNCTION(Server, Reliable)
 	void HandleElevatorDoorsOpenProgress(float value);
 
-	UPROPERTY(EditDefaultsOnly, Category = "Timeline")
+public:
+	UFUNCTION()
+	void CallBack_OpenDoors(class AMPECharacter* Character);
+
+	UFUNCTION()
+	void CallBack_CloseDoors();
+
+	UPROPERTY()
 	FTimeline DoorsCurveTimeLine;
 
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Timeline")
@@ -79,6 +86,11 @@ protected:
 
 protected:
 	// Elevator Anim Target/Init Locations
+	UPROPERTY()
+	FVector ElevatorCurrentLocation;
+
+	UPROPERTY()
+	FVector ElevatorTargetLocation;
 
 	// Doors Start
 	UPROPERTY(EditDefaultsOnly, Category = "Components Location")
@@ -96,12 +108,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Components Location")
 	FRotator LeftDoorInitRotation;
 	// Doors End
-
-	UPROPERTY(EditDefaultsOnly, Category = "Components Location")
-	FVector ElevatorCurrentLocation;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Components Location")
-	FVector ElevatorTargetLocation;
 
 	// Boxes Start
 	UPROPERTY(EditDefaultsOnly, Category = "Components Location")

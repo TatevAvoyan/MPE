@@ -85,14 +85,14 @@ public:
 	FOnEnterKeyb OnEnterKeyb;
 
 public:
-	UFUNCTION(Client, Reliable)
-	void Client_ShowWidget();
+	UFUNCTION()
+	void ShowFloorstNumberWidget();
+
+	UFUNCTION()
+	void ShowHintWidget(bool bCanShow);
 
 	UFUNCTION(Server, Reliable)
 	void Server_InteractPressed();
-	
-	UFUNCTION(NetMulticast, Reliable)
-	void Multi_InteractPressed();
 
 	UPROPERTY(Replicated)
 	bool bHit;
@@ -124,9 +124,6 @@ public:
 
 	UPROPERTY()
 	TObjectPtr<class UUserWidget> CameraHintWigetRef;
-
-	UPROPERTY()
-	bool bCanShow = false;
 
 	UPROPERTY()
 	bool bIsShow = false;

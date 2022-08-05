@@ -25,15 +25,15 @@ protected:
 
 private:
 	// Opens Elevator & shaft doors
-	UFUNCTION(NetMulticast, Reliable)
+	UFUNCTION(Server, Reliable)
 	void OpenDoors(class AMPECharacter* BaseCharacter);
 
 	// Opens Elevator & shaft doors
-	UFUNCTION(NetMulticast, Reliable)
+	UFUNCTION(Server, Reliable)
 	void OutsideOpenDoors(class AMPECharacter* BaseCharacter);
 
 	// Closes Elevator & shaft doors
-	UFUNCTION(NetMulticast, Reliable)
+	UFUNCTION(Server, Reliable)
 	void CloseDoors();
 
 private:
@@ -51,7 +51,7 @@ protected:
 	///////////////////////////////////////////////////////////////////////
 	// Timeline functions & Variables
 
-	UFUNCTION(NetMulticast, Reliable)
+	UFUNCTION(Server, Reliable)
 	void HandleProgress(float value);
 
 	UPROPERTY()

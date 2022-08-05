@@ -72,12 +72,16 @@ void AShaft::OutsideOpenDoors_Implementation(AMPECharacter* BaseCharacter)
 
 void AShaft::OpenDoors_Implementation(AMPECharacter* BaseCharacter)
 {
-	CuurentIndex = BaseCharacter->FloorNumbersWidget->ButtonNumber;
+	if (IsValid(BaseCharacter) && IsValid(BaseCharacter->FloorNumbersWidget))
+	{
+		CuurentIndex = BaseCharacter->FloorNumbersWidget->ButtonNumber;
+	}
 
 	//ShaftArr[CuurentIndex]->DoorsTimeline.Play();
 
 	if (IsValid(ElevatorRef) && !ElevatorRef->ElevatorCurveTimeLine.IsPlaying() && !ShaftArr.IsEmpty())
 	{
+		ElevatorRef->CallBack_OpenDoors(BaseCharacter);
 		ShaftArr[CuurentIndex]->DoorsTimeline.Play();
 	}
 }

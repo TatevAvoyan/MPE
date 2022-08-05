@@ -76,6 +76,8 @@ void AMPECharacter::BeginPlay()
 	if (IsValid(HintSubClass))
 	{
 		HintWigetRef = Cast<UUserWidget>(CreateWidget(GetWorld(), HintSubClass));
+		HintWigetRef->AddToViewport();
+		HintWigetRef->SetVisibility(ESlateVisibility::Hidden);
 	}
 
 	if (IsValid(CameraHintSubClass))
@@ -126,7 +128,7 @@ void AMPECharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInput
 	PlayerInputComponent->BindTouch(IE_Released, this, &AMPECharacter::TouchStopped);
 
 	// Shows Elevator floors widget Key R 
-	PlayerInputComponent->BindAction("ElevatorWidget", IE_Pressed, this, &AMPECharacter::Client_ShowWidget);
+	PlayerInputComponent->BindAction("ElevatorWidget", IE_Pressed, this, &AMPECharacter::ShowFloorstNumberWidget);
 	// LineTrace Key E 
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AMPECharacter::Server_InteractPressed);
 	// changes the camera from first person to third person and vice versa Key V
@@ -222,24 +224,39 @@ void AMPECharacter::CameraSwitch()
 }
 
 // Shows an elevator widget when the player presses the R button
-void AMPECharacter::Client_ShowWidget_Implementation()
+void AMPECharacter::ShowFloorstNumberWidget()
 {
-	if (IsValid(FloorNumbersWidget) && bCanShow)
+	if (IsValid(FloorNumbersWidget))
 	{
 		PlayerController = Cast<APlayerController>(GetOwner());
+
+		HintWigetRef->RemoveFromParent();
 		if (PlayerController)
 		{
 			PlayerController->SetInputMode(FInputModeUIOnly());
 			PlayerController->bShowMouseCursor = true;
 		}
-
-		if (IsValid(HintWigetRef))
-		{
-			HintWigetRef->RemoveFromParent();
-		}
 		FloorNumbersWidget->AddToViewport(0);
 	}
-	bIsShow = false;
+}
+
+// Sets Hint Widget Visibility. Called in Elevator class.
+void AMPECharacter::ShowHintWidget(bool bCanShow)
+{
+	if (GetLocalRole() == ROLE_AutonomousProxy || GetLocalRole() == ROLE_Authority)
+	{
+		if (IsValid(HintWigetRef))
+		{
+			if (bCanShow)
+			{
+				HintWigetRef->SetVisibility(ESlateVisibility::Visible);
+			}
+			else
+			{
+				HintWigetRef->SetVisibility(ESlateVisibility::Hidden);
+			}
+		}
+	}
 }
 
 // LineTrace Key E 
@@ -260,6 +277,7 @@ void AMPECharacter::Server_InteractPressed_Implementation()
 	bHit = UKismetSystemLibrary::LineTraceSingleForObjects(this, Start, End, TraceObjectTypes, false, ActorsToIgnore,
 		EDrawDebugTrace::ForDuration, HitResult, true, FLinearColor::Red, FLinearColor::Green, 3.0f);
 
+	// 
 	if (bHit)
 	{
 		if (OnOverlaped.IsBound())
@@ -267,15 +285,4 @@ void AMPECharacter::Server_InteractPressed_Implementation()
 			OnOverlaped.Broadcast(this);
 		}
 	}
-}
-
-void AMPECharacter::Multi_InteractPressed_Implementation()
-{
-	/*if (bHit)
-	{
-		if (OnOverlaped.IsBound())
-		{
-			OnOverlaped.Broadcast(this);
-		}
-	}*/
 }
