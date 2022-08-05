@@ -52,17 +52,20 @@ public:
 	UPROPERTY()
 	TObjectPtr<APlayerController> PlayerController = nullptr;
 
-	UFUNCTION(Client, Reliable)
-	void Client_OpenDoorsOpenButtonClicked();
+	UFUNCTION()
+	void Split_Conv_String(const class UButton* CurrentButton);
 
-	UFUNCTION(Client, Reliable)
-	void Client_ButtonClicked(const class UButton* CurrentButton);
-
-	UFUNCTION(NetMulticast, Reliable)
+	UFUNCTION(NetMulticast, Unreliable)
 	void Server_OpenDoorsOpenButtonClicked();
 
-	UFUNCTION(NetMulticast, Reliable)
+	UFUNCTION(NetMulticast, Unreliable)
 	void Server_ButtonClicked(const class UButton* CurrentButton);
+
+	UFUNCTION(Client, Unreliable)
+	void Client_DeactivateMouse_RemoveWidget();
+
+	UFUNCTION(Client, Unreliable)
+	void Client_HintWidget_AddToViewport();
 
 	UPROPERTY(BlueprintAssignable)
 	FOnOpenClicked OnOpenButtonClicked;

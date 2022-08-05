@@ -16,6 +16,12 @@ AElevator::AElevator()
 
 	bReplicates = true;
 
+	/*RightDoorInitLocation = (FVector(-30.0f, 0.0f, 0.0f));
+	LeftDoorInitLocation = (FVector(-30.0f, 63.0f, 0.0f));
+
+	RightDoorTargetLocation = (FVector(-30.0f, -50.0f, 0.0f));
+	LeftDoorTargetLocation = (FVector(-30.0f, 113.0f, 0.0f));*/
+
 	// Created Meshes
 	SceneElevator = CreateDefaultSubobject<USceneComponent>(FName("SceneElevator"));
 	RootComponent = SceneElevator;
@@ -23,11 +29,6 @@ AElevator::AElevator()
 	Elevator = CreateDefaultSubobject<UStaticMeshComponent>(FName("Elevator"));
 	Elevator->SetupAttachment(RootComponent);
 
-	/*RightDoorInitLocation = (FVector(-30.0f, 0.0f, 0.0f));
-	LeftDoorInitLocation = (FVector(-30.0f, 63.0f, 0.0f));
-
-	RightDoorTargetLocation = (FVector(-30.0f, -50.0f, 0.0f));
-	LeftDoorTargetLocation = (FVector(-30.0f, 113.0f, 0.0f));*/
 
 	ElevatorDoorRight = CreateDefaultSubobject<UStaticMeshComponent>(FName("DoorRight"));
 	ElevatorDoorRight->SetupAttachment(Elevator);
@@ -160,7 +161,6 @@ void AElevator::OnOverlapEnd_Implementation(UPrimitiveComponent* OverlappedCompo
 // Moves the elevator using the Timeline
 void AElevator::Server_MoveElevator_Implementation(AMPECharacter* Character, int32 TargetFloor)
 {
-
 	FVector ActorLocation = Elevator->GetComponentLocation();
 	ElevatorCurrentLocation = Elevator->GetComponentLocation();
 

@@ -26,7 +26,6 @@ AShaft::AShaft()
 
 	ShaftInnerBox = CreateDefaultSubobject<UBoxComponent>(FName("Collision Mesh"));
 	ShaftInnerBox->SetupAttachment(RootComponent);
-	
 }
 
 void AShaft::BeginPlay()
@@ -74,7 +73,6 @@ void AShaft::OutsideOpenDoors_Implementation(AMPECharacter* BaseCharacter)
 void AShaft::OpenDoors_Implementation(AMPECharacter* BaseCharacter)
 {
 	CuurentIndex = BaseCharacter->FloorNumbersWidget->ButtonNumber;
-
 
 	//ShaftArr[CuurentIndex]->DoorsTimeline.Play();
 
