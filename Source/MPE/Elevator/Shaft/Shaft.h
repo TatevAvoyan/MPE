@@ -47,7 +47,7 @@ private:
 	void OnComponentEndOverlap(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 
-protected:
+public:
 	///////////////////////////////////////////////////////////////////////
 	// Timeline functions & Variables
 
@@ -59,9 +59,6 @@ protected:
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Timeline")
 	TObjectPtr <class UCurveFloat> DoorsCurve;
-
-	UPROPERTY()
-	int32 CuurentIndex = 0;
 
 protected:
 	// Meshes
@@ -114,16 +111,4 @@ protected:
 
 public:
 	TObjectPtr<class AMPECharacter> CharacterBase;
-
-	UPROPERTY(BlueprintReadWrite, Category = "ShaftArr")
-	TArray<class AShaft*> ShaftArr;
-
-	UPROPERTY(EditDefaultsOnly, Category = "ElevatorSub")
-	TSubclassOf<class AElevator> ElevatorSub;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shaft Ref")
-	AElevator* ElevatorObj;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shaft Ref")
-	TObjectPtr<class AElevator> ElevatorRef;
 };

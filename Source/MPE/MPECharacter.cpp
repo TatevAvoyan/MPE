@@ -4,6 +4,7 @@
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
+#include "Components/AudioComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/PlayerController.h"
@@ -63,6 +64,10 @@ AMPECharacter::AMPECharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+
+	// Create AudioComponent
+	Button_Press = CreateDefaultSubobject<UAudioComponent>(TEXT("Press"));
+	Button_Press->SetupAttachment(RootComponent);
 }
 
 void AMPECharacter::BeginPlay()
@@ -226,7 +231,7 @@ void AMPECharacter::CameraSwitch()
 // Shows an elevator widget when the player presses the R button
 void AMPECharacter::ShowFloorstNumberWidget()
 {
-	if (IsValid(FloorNumbersWidget))
+	if (IsValid(FloorNumbersWidget) && bIsShow)
 	{
 		PlayerController = Cast<APlayerController>(GetOwner());
 
@@ -259,6 +264,7 @@ void AMPECharacter::ShowHintWidget(bool bCanShow)
 	}
 }
 
+
 // LineTrace Key E 
 void AMPECharacter::Server_InteractPressed_Implementation()
 {
@@ -277,12 +283,25 @@ void AMPECharacter::Server_InteractPressed_Implementation()
 	bHit = UKismetSystemLibrary::LineTraceSingleForObjects(this, Start, End, TraceObjectTypes, false, ActorsToIgnore,
 		EDrawDebugTrace::ForDuration, HitResult, true, FLinearColor::Red, FLinearColor::Green, 3.0f);
 
-	// 
 	if (bHit)
 	{
+		PlayButtonSound();
+
 		if (OnOverlaped.IsBound())
 		{
 			OnOverlaped.Broadcast(this);
+		}
+	}
+}
+
+void AMPECharacter::PlayButtonSound()
+{
+	if (IsValid(Button_Press) && IsValid(Button_Press_SoundBase))
+	{
+		if (!Button_Press->IsPlaying())
+		{
+			Button_Press->SetSound(Button_Press_SoundBase);
+			Button_Press->Play();
 		}
 	}
 }

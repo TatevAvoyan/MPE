@@ -3,6 +3,7 @@
 #include "MPE/MPECharacter.h"
 #include "ElevatorWidget.h"
 #include "Components/BoxComponent.h"
+#include "Components/AudioComponent.h"
 
 
 AShaft::AShaft()
@@ -42,6 +43,11 @@ void AShaft::BeginPlay()
 
 		this->DoorsTimeline.AddInterpFloat(DoorsCurve, TimeLineProgress);
 	}
+
+	//if (IsValid(Doors_Opening_Closing_SoundBase))
+	//{
+	//	Doors_Opening_Closing_AComp->SetSound(Doors_Opening_Closing_SoundBase);
+	//}
 }
 
 void AShaft::Tick(float DeltaTime)
@@ -72,18 +78,19 @@ void AShaft::OutsideOpenDoors_Implementation(AMPECharacter* BaseCharacter)
 
 void AShaft::OpenDoors_Implementation(AMPECharacter* BaseCharacter)
 {
-	if (IsValid(BaseCharacter) && IsValid(BaseCharacter->FloorNumbersWidget))
+	/*if (IsValid(BaseCharacter) && IsValid(BaseCharacter->FloorNumbersWidget))
 	{
 		CuurentIndex = BaseCharacter->FloorNumbersWidget->ButtonNumber;
-	}
+	}*/
 
 	//ShaftArr[CuurentIndex]->DoorsTimeline.Play();
 
-	if (IsValid(ElevatorRef) && !ElevatorRef->ElevatorCurveTimeLine.IsPlaying() && !ShaftArr.IsEmpty())
+	/*if (IsValid(ElevatorRef) && !ElevatorRef->ElevatorCurveTimeLine.IsPlaying() && !ShaftArr.IsEmpty())
 	{
 		ElevatorRef->CallBack_OpenDoors(BaseCharacter);
 		ShaftArr[CuurentIndex]->DoorsTimeline.Play();
-	}
+		PlayDoorsSound();
+	}*/
 }
 
 void AShaft::CloseDoors_Implementation()
@@ -123,5 +130,6 @@ void AShaft::OnComponentEndOverlap_Implementation(UPrimitiveComponent* Overlappe
 			//CharacterBase->FloorNumbersWidget->OnOpenButtonClicked.RemoveDynamic(this, &AShaft::OpenDoors);
 		}
 	}
-	this->DoorsTimeline.Reverse();
+
+	DoorsTimeline.Reverse();
 }

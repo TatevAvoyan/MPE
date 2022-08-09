@@ -32,12 +32,12 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 	void OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-	// ElevatorOuterBox Begin/End Overlap Callback Functions
+	/*// ElevatorOuterBox Begin/End Overlap Callback Functions
 	UFUNCTION(NetMulticast, Reliable)
 	void OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	void OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);*/
 
 protected:
 	// Elevator move functions & Variables
@@ -57,9 +57,6 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Timeline")
 	TObjectPtr<class UCurveFloat> ElevatorCurveFloat;
 
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	class AElevator* GetElevatorRef();
-
 protected:
 	// Elevator Doors Open/Close functions & Variables
 	UFUNCTION(Server, Reliable)
@@ -76,7 +73,7 @@ public:
 	void CallBack_OpenDoors(class AMPECharacter* Character);
 
 	UFUNCTION()
-	void CallBack_CloseDoors();
+	void CallBack_CloseDoors(AMPECharacter* Character, int32 TargetFloor);
 
 	UPROPERTY()
 	FTimeline DoorsCurveTimeLine;
@@ -123,8 +120,8 @@ protected:
 	FVector InnerBoxExtent;
 	// Boxes End
 
-	UPROPERTY(EditDefaultsOnly, Category = "Floor", meta = (ClampMin = 1, ClampMax = 8))
-	int32 CurrentFloor = 1;
+	UPROPERTY()
+	int32 CurrentFloorindex = 1;
 
 protected:
 	// Meshes
@@ -143,14 +140,67 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly)
 	TObjectPtr<class UBoxComponent> InnerBox;
 
-	UPROPERTY(VisibleDefaultsOnly)
-	TObjectPtr<class UBoxComponent> OuterBox;
+	/*UPROPERTY(VisibleDefaultsOnly)
+	TObjectPtr<class UBoxComponent> OuterBox;*/
 
 	UPROPERTY(VisibleDefaultsOnly)
 	TObjectPtr<class USceneComponent> SceneElevator = nullptr;
 
 public:
 	// Shaft Vars
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Floors Cout", meta = (ClampMin = 2, ClampMax = 8))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Shaft, meta = (ClampMin = 2, ClampMax = 8))
 	int ShaftFloorsCount;
+
+	UPROPERTY(VisibleAnywhere,BlueprintReadWrite, Category = Shaft)
+	TArray<class AShaft*> Shafts;
+
+	UPROPERTY()
+	int32 ClickedFloor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Shaft)
+	float FloorHeight = 300.f;
+
+protected:
+	// Sounds
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Audio)
+	TObjectPtr<class USoundBase> Background_SoundBase;
+
+	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = true))
+	TObjectPtr<class UAudioComponent> Background_Sound_AudioComp;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Audio)
+	TObjectPtr<class USoundBase> Elevator_Arrived_SoundBase;
+
+	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = true))
+	TObjectPtr<class UAudioComponent> Elevator_Arrived_AudioComp;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Audio)
+	TObjectPtr<class USoundBase> Elevator_Move_SoundBase;
+
+	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = true))
+	TObjectPtr<class UAudioComponent> Elevator_Move_AudioComp;
+
+private:
+	UFUNCTION()
+	void PlayBackgroundSound();
+
+	UFUNCTION()
+	void PlayElevatorMoveSound();
+
+	UFUNCTION()
+	void PlayElevatorArrivedSound();
+
+	UFUNCTION()
+	void TimelineFinishedCallback();
+
+public:
+	// Sounds
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sounds")
+		TObjectPtr<class USoundBase> Doors_Opening_Closing_SoundBase;
+
+	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = true))
+		TObjectPtr<class UAudioComponent> Doors_Opening_Closing_AudioComp;
+
+	UFUNCTION()
+		void PlayDoorsSound();
 };

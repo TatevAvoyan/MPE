@@ -130,5 +130,17 @@ public:
 
 	UPROPERTY()
 	bool FirstPerson;
+
+protected:
+	// Sounds
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sounds")
+	TObjectPtr<class USoundBase> Button_Press_SoundBase;
+
+	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = true))
+	TObjectPtr<class UAudioComponent> Button_Press = nullptr;
+
+public:
+	UFUNCTION()
+	void PlayButtonSound();
 };
 

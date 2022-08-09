@@ -16,7 +16,7 @@ void UElevatorWidget::NativeOnInitialized()
 
 	if (IsValid(OpenShaftDoorsButton))
 	{
-		OpenShaftDoorsButton->OnClicked.AddUniqueDynamic(this, &UElevatorWidget::Server_OpenDoorsOpenButtonClicked);
+		OpenShaftDoorsButton->OnClicked.AddUniqueDynamic(this, &UElevatorWidget::Client_OpenDoorsOpenButtonClicked);
 	}
 
 	if (IsValid(Button_1))
@@ -61,9 +61,9 @@ void UElevatorWidget::NativeOnInitialized()
 }
 
 
-void UElevatorWidget::Server_OpenDoorsOpenButtonClicked_Implementation()
+void UElevatorWidget::Client_OpenDoorsOpenButtonClicked_Implementation()
 {
-	Server_Call();
+	Server_OpenDoorsOpenButtonClicked();
 }
 
 
@@ -74,15 +74,36 @@ void UElevatorWidget::Server_ButtonClicked_Implementation(const UButton* Current
 
 	Client_DeactivateMouse_RemoveWidget();
 
+	if (IsValid(MyCharacter))
+	{
+		MyCharacter->PlayButtonSound();
+	}
+
 	Client_HintWidget_AddToViewport();
 
 	if (OnFloorButtonClicked.IsBound())
 	{
-		--ButtonNumber;
 		OnFloorButtonClicked.Broadcast(MyCharacter, ButtonNumber);
 	}
 }
 
+void UElevatorWidget::Server_OpenDoorsOpenButtonClicked_Implementation()
+{
+	UKismetSystemLibrary::PrintString(this, "OpenDoorsOpenButtonClicked");
+	if (OnOpenButtonClicked.IsBound())
+	{
+		OnOpenButtonClicked.Broadcast(MyCharacter);
+	}
+
+	Client_DeactivateMouse_RemoveWidget();
+
+	if (IsValid(MyCharacter))
+	{
+		MyCharacter->PlayButtonSound();
+	}
+
+	Client_HintWidget_AddToViewport();
+}
 
 void UElevatorWidget::Split_Conv_String(const UButton* CurrentButton)
 {
@@ -92,7 +113,8 @@ void UElevatorWidget::Split_Conv_String(const UButton* CurrentButton)
 	ButtonNumber = UKismetStringLibrary::Conv_StringToInt(Right);
 }
 
-void UElevatorWidget::Client_DeactivateMouse_RemoveWidget_Implementation()
+
+void UElevatorWidget::Client_DeactivateMouse_RemoveWidget()
 {
 	// DeActivated Mouse Cursor
 	if (PlayerController)
@@ -105,20 +127,7 @@ void UElevatorWidget::Client_DeactivateMouse_RemoveWidget_Implementation()
 	RemoveFromViewport();
 }
 
-void UElevatorWidget::Server_Call_Implementation()
-{
-	UKismetSystemLibrary::PrintString(this, "OpenDoorsOpenButtonClicked");
-	if (OnOpenButtonClicked.IsBound())
-	{
-		OnOpenButtonClicked.Broadcast(MyCharacter);
-	}
-
-	Client_DeactivateMouse_RemoveWidget();
-
-	Client_HintWidget_AddToViewport();
-}
-
-void UElevatorWidget::Client_HintWidget_AddToViewport_Implementation()
+void UElevatorWidget::Client_HintWidget_AddToViewport()
 {
 	// Adding Hint Widget to Viewport
 	if (IsValid(MyCharacter))
