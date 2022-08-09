@@ -83,7 +83,6 @@ void AElevator::BeginPlay()
 		FOnTimelineFloat DoorsTimeLineProgress;
 		DoorsTimeLineProgress.BindUFunction(this, FName("HandleElevatorDoorsOpenProgress"));
 		DoorsCurveTimeLine.AddInterpFloat(DoorsCurveFloat, DoorsTimeLineProgress);
-		DoorsCurveTimeLine.Play();
 
 		FOnTimelineFloat ElevatorTimeLineProgress;
 		FOnTimelineEventStatic onTimelineFinishedCallback;
@@ -91,6 +90,12 @@ void AElevator::BeginPlay()
 		onTimelineFinishedCallback.BindUFunction(this, FName{ TEXT("TimelineFinishedCallback") });
 		ElevatorCurveTimeLine.AddInterpFloat(ElevatorCurveFloat, ElevatorTimeLineProgress);
 		ElevatorCurveTimeLine.SetTimelineFinishedFunc(onTimelineFinishedCallback);
+	}
+
+	if (!Shafts.IsEmpty())
+	{
+		DoorsCurveTimeLine.Play();
+		Shafts[CurrentFloorindex]->DoorsTimeline.Play();
 	}
 
 	/*if (IsValid(Background_SoundBase))

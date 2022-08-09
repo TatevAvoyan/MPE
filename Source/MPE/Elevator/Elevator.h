@@ -121,7 +121,7 @@ protected:
 	// Boxes End
 
 	UPROPERTY()
-	int32 CurrentFloorindex = 1;
+	int32 CurrentFloorindex = 0;
 
 protected:
 	// Meshes
@@ -155,7 +155,7 @@ public:
 	TArray<class AShaft*> Shafts;
 
 	UPROPERTY()
-	int32 ClickedFloor;
+	int32 ClickedFloor = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Shaft)
 	float FloorHeight = 300.f;
