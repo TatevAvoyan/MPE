@@ -4,6 +4,8 @@
 #include "Elevator.h"
 #include "Shaft.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnOuterPanelHit, float, fHitFloorLoaction, AMPECharacter*, BaseCharacter);
+
 
 UCLASS()
 class MPE_API AShaft : public AActor
@@ -26,15 +28,7 @@ protected:
 private:
 	// Opens Elevator & shaft doors
 	UFUNCTION(Server, Reliable)
-	void OpenDoors(class AMPECharacter* BaseCharacter);
-
-	// Opens Elevator & shaft doors
-	UFUNCTION(Server, Reliable)
 	void OutsideOpenDoors(class AMPECharacter* BaseCharacter);
-
-	// Closes Elevator & shaft doors
-	UFUNCTION(Server, Reliable)
-	void CloseDoors();
 
 private:
 	///////////////////////////////////////////////////////////////////////
@@ -111,4 +105,10 @@ protected:
 
 public:
 	TObjectPtr<class AMPECharacter> CharacterBase;
+
+	UPROPERTY()
+	float ShaftLocation;
+
+	UPROPERTY()
+	FOnOuterPanelHit OnOuterPanelHit;
 };

@@ -83,7 +83,7 @@ void UElevatorWidget::Server_ButtonClicked_Implementation(const UButton* Current
 
 	if (OnFloorButtonClicked.IsBound())
 	{
-		OnFloorButtonClicked.Broadcast(MyCharacter, ButtonNumber);
+		OnFloorButtonClicked.Broadcast(MyCharacter, --ButtonNumber);
 	}
 }
 

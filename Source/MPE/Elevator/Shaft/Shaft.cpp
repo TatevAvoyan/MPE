@@ -43,11 +43,6 @@ void AShaft::BeginPlay()
 
 		this->DoorsTimeline.AddInterpFloat(DoorsCurve, TimeLineProgress);
 	}
-
-	//if (IsValid(Doors_Opening_Closing_SoundBase))
-	//{
-	//	Doors_Opening_Closing_AComp->SetSound(Doors_Opening_Closing_SoundBase);
-	//}
 }
 
 void AShaft::Tick(float DeltaTime)
@@ -73,29 +68,12 @@ void AShaft::OnConstruction(const FTransform& Transform)
 
 void AShaft::OutsideOpenDoors_Implementation(AMPECharacter* BaseCharacter)
 {
-	DoorsTimeline.Play();
-}
+	ShaftLocation = GetActorLocation().Z;
 
-void AShaft::OpenDoors_Implementation(AMPECharacter* BaseCharacter)
-{
-	/*if (IsValid(BaseCharacter) && IsValid(BaseCharacter->FloorNumbersWidget))
+	if (OnOuterPanelHit.IsBound())
 	{
-		CuurentIndex = BaseCharacter->FloorNumbersWidget->ButtonNumber;
-	}*/
-
-	//ShaftArr[CuurentIndex]->DoorsTimeline.Play();
-
-	/*if (IsValid(ElevatorRef) && !ElevatorRef->ElevatorCurveTimeLine.IsPlaying() && !ShaftArr.IsEmpty())
-	{
-		ElevatorRef->CallBack_OpenDoors(BaseCharacter);
-		ShaftArr[CuurentIndex]->DoorsTimeline.Play();
-		PlayDoorsSound();
-	}*/
-}
-
-void AShaft::CloseDoors_Implementation()
-{
-	DoorsTimeline.Reverse();
+		OnOuterPanelHit.Broadcast(ShaftLocation, BaseCharacter);
+	}
 }
 
 void AShaft::HandleProgress_Implementation(float value)
@@ -112,10 +90,6 @@ void AShaft::OnComponentBeginOverlap_Implementation(UPrimitiveComponent* Overlap
 	if (IsValid(CharacterBase))
 	{
 		CharacterBase->OnOverlaped.AddUniqueDynamic(this, &AShaft::OutsideOpenDoors);
-		if (IsValid(CharacterBase->FloorNumbersWidget))
-		{
-			CharacterBase->FloorNumbersWidget->OnOpenButtonClicked.AddUniqueDynamic(this, &AShaft::OpenDoors);
-		}
 	}
 }
 
@@ -125,11 +99,5 @@ void AShaft::OnComponentEndOverlap_Implementation(UPrimitiveComponent* Overlappe
 	if (IsValid(CharacterBase))
 	{
 		CharacterBase->OnOverlaped.RemoveDynamic(this, &AShaft::OutsideOpenDoors);
-		if (IsValid(CharacterBase->FloorNumbersWidget))
-		{
-			//CharacterBase->FloorNumbersWidget->OnOpenButtonClicked.RemoveDynamic(this, &AShaft::OpenDoors);
-		}
 	}
-
-	DoorsTimeline.Reverse();
 }

@@ -11,7 +11,7 @@
 #include "Blueprint/UserWidget.h"
 #include "ElevatorWidget.h"
 #include "Shaft/Shaft.h"
-
+#include "Math/UnrealMathUtility.h"
 
 
 AElevator::AElevator()
@@ -20,19 +20,12 @@ AElevator::AElevator()
 
 	bReplicates = true;
 
-	/*RightDoorInitLocation = (FVector(-30.0f, 0.0f, 0.0f));
-	LeftDoorInitLocation = (FVector(-30.0f, 63.0f, 0.0f));
-
-	RightDoorTargetLocation = (FVector(-30.0f, -50.0f, 0.0f));
-	LeftDoorTargetLocation = (FVector(-30.0f, 113.0f, 0.0f));*/
-
 	// Created Meshes
 	SceneElevator = CreateDefaultSubobject<USceneComponent>(FName("SceneElevator"));
 	RootComponent = SceneElevator;
 
 	Elevator = CreateDefaultSubobject<UStaticMeshComponent>(FName("Elevator"));
 	Elevator->SetupAttachment(RootComponent);
-
 
 	ElevatorDoorRight = CreateDefaultSubobject<UStaticMeshComponent>(FName("DoorRight"));
 	ElevatorDoorRight->SetupAttachment(Elevator);
@@ -72,10 +65,6 @@ void AElevator::BeginPlay()
 	// Bind Functions On Character Begin Overlap & End Overlap ElevatorBox UBoxComponent
 	InnerBox->OnComponentBeginOverlap.AddDynamic(this, &AElevator::OnOverlapBegin);
 	InnerBox->OnComponentEndOverlap.AddDynamic(this, &AElevator::OnOverlapEnd); 
-	
-	// Bind Functions On Character Begin Overlap & End Overlap ElevatorBox UBoxComponent
-	/*OuterBox->OnComponentBeginOverlap.AddDynamic(this, &AElevator::OnBeginOverlap);
-	OuterBox->OnComponentEndOverlap.AddDynamic(this, &AElevator::OnEndOverlap);*/
 
 	/////////////////////////////////////////////////////////////////////////////////////////////
 	if (ElevatorCurveFloat && DoorsCurveFloat)
@@ -94,14 +83,13 @@ void AElevator::BeginPlay()
 
 	if (!Shafts.IsEmpty())
 	{
+		for (int32 i = 0; i < Shafts.Num(); i++)
+		{
+			Shafts[i]->OnOuterPanelHit.AddUniqueDynamic(this, &AElevator::CheckLocation);
+		}
 		DoorsCurveTimeLine.Play();
 		Shafts[CurrentFloorindex]->DoorsTimeline.Play();
 	}
-
-	/*if (IsValid(Background_SoundBase))
-	{
-		UGameplayStatics::PlaySoundAtLocation(this, Background_SoundBase, GetActorLocation());
-	}*/
 }
 
 // Called every frame
@@ -154,18 +142,6 @@ void AElevator::OnEndOverlap_Implementation(UPrimitiveComponent* OverlappedCompo
 	Server_CloseDoors();
 }*/
 
-// ElevatorInnerBox End Overlap Callback Functions
-// Deactivates the input to open the widget and removes instructions on how to open the widget
-void AElevator::OnOverlapEnd_Implementation(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	AMPECharacter* Character = Cast<AMPECharacter>(OtherActor);
-	if (IsValid(Character))
-	{
-		Character->bIsShow = false;
-		Character->ShowHintWidget(false);
-	}
-}
-
 // ElevatorInnerBox Begin Overlap Callback Functions
 // Activates input to open the widget and shows instructions on how to open the widget
 void AElevator::OnOverlapBegin_Implementation(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -174,28 +150,45 @@ void AElevator::OnOverlapBegin_Implementation(UPrimitiveComponent* OverlappedCom
 
 	if (IsValid(Character))
 	{
+		BackgroundSound(true);
 		Character->bIsShow = true;
 		Character->ShowHintWidget(true);
 
 		if (IsValid(Character->FloorNumbersWidget))
 		{
-			Character->FloorNumbersWidget->OnFloorButtonClicked.AddUniqueDynamic(this, &AElevator::Server_MoveElevator);
 			Character->FloorNumbersWidget->OnFloorButtonClicked.AddUniqueDynamic(this, &AElevator::CallBack_CloseDoors);
 			Character->FloorNumbersWidget->OnOpenButtonClicked.AddUniqueDynamic(this, &AElevator::CallBack_OpenDoors);
+			Character->FloorNumbersWidget->OnFloorButtonClicked.AddUniqueDynamic(this, &AElevator::Server_MoveElevator);
 		}
+	}
+}
+
+// ElevatorInnerBox End Overlap Callback Functions
+// Deactivates the input to open the widget and removes instructions on how to open the widget
+void AElevator::OnOverlapEnd_Implementation(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	AMPECharacter* Character = Cast<AMPECharacter>(OtherActor);
+	if (IsValid(Character))
+	{
+		BackgroundSound(false);
+		Character->bIsShow = false;
+		Character->ShowHintWidget(false);
 	}
 }
 
 // Moves the elevator using the Timeline
 void AElevator::Server_MoveElevator_Implementation(AMPECharacter* Character, int32 TargetFloor)
 {
-	ClickedFloor = --TargetFloor;
+	ClickedFloor = TargetFloor;
+	if (CurrentFloorindex == ClickedFloor)
+	{
+		return;
+	}
 	FVector ActorLocation = Elevator->GetComponentLocation();
 	ElevatorCurrentLocation = Elevator->GetComponentLocation();
-
+	
 	ActorLocation.Z = FloorHeight * TargetFloor + 0.2f;
 	ElevatorTargetLocation = ActorLocation;
-
 	MoveElevator(Character, TargetFloor);
 }
 
@@ -203,7 +196,6 @@ void AElevator::MoveElevator_Implementation(AMPECharacter* Character, int32 Targ
 {
 	ElevatorCurveTimeLine.Play();
 	ElevatorCurveTimeLine.SetNewTime(0);
-	PlayBackgroundSound();
 	PlayElevatorMoveSound();
 }
 
@@ -251,14 +243,28 @@ void AElevator::CallBack_CloseDoors(AMPECharacter* Character, int32 TargetFloor)
 	}
 }
 
-void AElevator::PlayBackgroundSound()
+void AElevator::CheckLocation(float ShaftLcationZ, AMPECharacter* BaseCharacter)
 {
+	FVector ActorLocation = Elevator->GetComponentLocation();
+	ClickedFloor = int(ShaftLcationZ / FloorHeight);
+	
+	CallBack_CloseDoors(BaseCharacter, CurrentFloorindex);
+	Server_MoveElevator(BaseCharacter, ClickedFloor);
+}
+
+void AElevator::BackgroundSound(bool bCanPlay)
+{
+	
 	if (IsValid(Background_Sound_AudioComp) && IsValid(Background_SoundBase))
 	{
-		if (!Background_Sound_AudioComp->IsPlaying())
+		if (!Background_Sound_AudioComp->IsPlaying() && bCanPlay)
 		{
 			Background_Sound_AudioComp->SetSound(Background_SoundBase);
 			Background_Sound_AudioComp->Play();
+		}
+		else
+		{
+			Background_Sound_AudioComp->Stop();
 		}
 	}
 }
@@ -311,9 +317,8 @@ void AElevator::TimelineFinishedCallback()
 		PlayDoorsSound();
 	}
 
-	if (IsValid(Elevator_Move_AudioComp) && IsValid(Background_Sound_AudioComp))
+	if (IsValid(Elevator_Move_AudioComp))
 	{
 		Elevator_Move_AudioComp->Stop();
-		Background_Sound_AudioComp->Stop();
 	}
 }

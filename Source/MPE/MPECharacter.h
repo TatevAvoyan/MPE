@@ -91,7 +91,7 @@ public:
 	UFUNCTION()
 	void ShowHintWidget(bool bCanShow);
 
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(NetMulticast, Reliable)
 	void Server_InteractPressed();
 
 	UPROPERTY(Replicated)

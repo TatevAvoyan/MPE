@@ -13,6 +13,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "CrossairWidget.h"
 #include "ElevatorWidget.h"
+#include "Elevator/Elevator.h"
 #include "Net/UnrealNetwork.h"
 
 //////////////////////////////////////////////////////////////////////////

@@ -59,10 +59,10 @@ public:
 
 protected:
 	// Elevator Doors Open/Close functions & Variables
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(NetMulticast, Reliable)
 	void Server_OpenDoors(class AMPECharacter* Character);
 
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(NetMulticast, Reliable)
 	void Server_CloseDoors();
 
 	UFUNCTION(Server, Reliable)
@@ -89,6 +89,9 @@ protected:
 	UPROPERTY()
 	FVector ElevatorTargetLocation;
 
+	UPROPERTY()
+	float ElevatorLocationZ;
+
 	// Doors Start
 	UPROPERTY(EditDefaultsOnly, Category = "Components Location")
 	FVector RightDoorTargetLocation;
@@ -106,20 +109,13 @@ protected:
 	FRotator LeftDoorInitRotation;
 	// Doors End
 
-	// Boxes Start
-	UPROPERTY(EditDefaultsOnly, Category = "Components Location")
-	FVector OuterBoxInitLocation;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Components Location")
-	FVector OuterBoxExtent;
-
+	// Collision Boxes
 	UPROPERTY(EditDefaultsOnly, Category = "Components Location")
 	FVector InnerBoxInitLocation;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Components Location")
 	FVector InnerBoxExtent;
-	// Boxes End
-
+	
 	UPROPERTY()
 	int32 CurrentFloorindex = 0;
 
@@ -160,6 +156,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Shaft)
 	float FloorHeight = 300.f;
 
+	UFUNCTION()
+	void CheckLocation(float ShaftLcationZ, AMPECharacter* BaseCharacter);
+
 protected:
 	// Sounds
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Audio)
@@ -182,7 +181,7 @@ protected:
 
 private:
 	UFUNCTION()
-	void PlayBackgroundSound();
+	void BackgroundSound(bool bCanPlay);
 
 	UFUNCTION()
 	void PlayElevatorMoveSound();
@@ -196,11 +195,11 @@ private:
 public:
 	// Sounds
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sounds")
-		TObjectPtr<class USoundBase> Doors_Opening_Closing_SoundBase;
+	TObjectPtr<class USoundBase> Doors_Opening_Closing_SoundBase;
 
 	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = true))
-		TObjectPtr<class UAudioComponent> Doors_Opening_Closing_AudioComp;
+	TObjectPtr<class UAudioComponent> Doors_Opening_Closing_AudioComp;
 
 	UFUNCTION()
-		void PlayDoorsSound();
+	void PlayDoorsSound();
 };
