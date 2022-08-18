@@ -26,18 +26,21 @@ protected:
 	virtual void OnConstruction(const FTransform& Transform) override;
 
 private:
-	// Opens Elevator & shaft doors
+	// 
 	UFUNCTION(Server, Reliable)
-	void OutsideOpenDoors(class AMPECharacter* BaseCharacter);
+	void HitClallback(class AMPECharacter* BaseCharacter);
+
+	UFUNCTION(Server, Reliable)
+	void BindsInBeginPlay();
 
 private:
 	///////////////////////////////////////////////////////////////////////
 	// Collision Box functions
 
-	UFUNCTION(NetMulticast, Reliable)
+	UFUNCTION()
 	void OnComponentBeginOverlap(class UPrimitiveComponent* OverlappedComponent, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-	UFUNCTION(NetMulticast, Reliable)
+	UFUNCTION()
 	void OnComponentEndOverlap(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 
@@ -45,8 +48,11 @@ public:
 	///////////////////////////////////////////////////////////////////////
 	// Timeline functions & Variables
 
-	UFUNCTION(Server, Reliable)
+	UFUNCTION()
 	void HandleProgress(float value);
+
+	UFUNCTION()
+	void TimelinesSetup();
 
 	UPROPERTY()
 	FTimeline DoorsTimeline;

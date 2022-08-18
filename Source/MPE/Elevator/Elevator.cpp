@@ -12,6 +12,7 @@
 #include "ElevatorWidget.h"
 #include "Shaft/Shaft.h"
 #include "Math/UnrealMathUtility.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 
 AElevator::AElevator()
@@ -62,34 +63,8 @@ void AElevator::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	// Bind Functions On Character Begin Overlap & End Overlap ElevatorBox UBoxComponent
-	InnerBox->OnComponentBeginOverlap.AddDynamic(this, &AElevator::OnOverlapBegin);
-	InnerBox->OnComponentEndOverlap.AddDynamic(this, &AElevator::OnOverlapEnd); 
-
-	/////////////////////////////////////////////////////////////////////////////////////////////
-	if (ElevatorCurveFloat && DoorsCurveFloat)
-	{
-		FOnTimelineFloat DoorsTimeLineProgress;
-		DoorsTimeLineProgress.BindUFunction(this, FName("HandleElevatorDoorsOpenProgress"));
-		DoorsCurveTimeLine.AddInterpFloat(DoorsCurveFloat, DoorsTimeLineProgress);
-
-		FOnTimelineFloat ElevatorTimeLineProgress;
-		FOnTimelineEventStatic onTimelineFinishedCallback;
-		ElevatorTimeLineProgress.BindUFunction(this, FName("HandleElevatorMoveProgress"));
-		onTimelineFinishedCallback.BindUFunction(this, FName{ TEXT("TimelineFinishedCallback") });
-		ElevatorCurveTimeLine.AddInterpFloat(ElevatorCurveFloat, ElevatorTimeLineProgress);
-		ElevatorCurveTimeLine.SetTimelineFinishedFunc(onTimelineFinishedCallback);
-	}
-
-	if (!Shafts.IsEmpty())
-	{
-		for (int32 i = 0; i < Shafts.Num(); i++)
-		{
-			Shafts[i]->OnOuterPanelHit.AddUniqueDynamic(this, &AElevator::CheckLocation);
-		}
-		DoorsCurveTimeLine.Play();
-		Shafts[CurrentFloorindex]->DoorsTimeline.Play();
-	}
+	TimelinesSetup();
+	BindsInBeginPlay();
 }
 
 // Called every frame
@@ -119,32 +94,46 @@ void AElevator::OnConstruction(const FTransform& Transform)
 	InnerBox->SetRelativeLocation(InnerBoxInitLocation);
 }
 
-/*
-// ElevatorOuterBox Begin Overlap Callback Functions
-void AElevator::OnBeginOverlap_Implementation(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void AElevator::TimelinesSetup()
 {
-	AMPECharacter* CharacterBase = Cast<AMPECharacter>(OtherActor);
-
-	if (IsValid(CharacterBase))
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	if (ElevatorCurveFloat && DoorsCurveFloat)
 	{
-		CharacterBase->OnOverlaped.AddUniqueDynamic(this, &AElevator::CallBack_OpenDoors);
-		if (IsValid(CharacterBase->FloorNumbersWidget))
+		FOnTimelineFloat DoorsTimeLineProgress;
+		DoorsTimeLineProgress.BindUFunction(this, FName("HandleElevatorDoorsOpenProgress"));
+		DoorsCurveTimeLine.AddInterpFloat(DoorsCurveFloat, DoorsTimeLineProgress);
+
+		FOnTimelineFloat ElevatorTimeLineProgress;
+		FOnTimelineEventStatic onTimelineFinishedCallback;
+		ElevatorTimeLineProgress.BindUFunction(this, FName("HandleElevatorMoveProgress"));
+		onTimelineFinishedCallback.BindUFunction(this, FName{ TEXT("TimelineFinishedCallback") });
+		ElevatorCurveTimeLine.AddInterpFloat(ElevatorCurveFloat, ElevatorTimeLineProgress);
+		ElevatorCurveTimeLine.SetTimelineFinishedFunc(onTimelineFinishedCallback);
+	}
+}
+
+// Server
+void AElevator::BindsInBeginPlay_Implementation()
+{
+	// Bind Functions On Character Begin Overlap & End Overlap ElevatorBox UBoxComponent
+	InnerBox->OnComponentBeginOverlap.AddDynamic(this, &AElevator::OnOverlapBegin);
+	InnerBox->OnComponentEndOverlap.AddDynamic(this, &AElevator::OnOverlapEnd);
+
+	// Bind Function On Elevator Outer Panels Hit
+	if (!Shafts.IsEmpty())
+	{
+		for (int32 i = 0; i < Shafts.Num(); i++)
 		{
-			CharacterBase->FloorNumbersWidget->OnOpenButtonClicked.AddUniqueDynamic(this, &AElevator::CallBack_OpenDoors);
+			UKismetSystemLibrary::PrintText(this, INVTEXT("AElevator::BindsInBeginPlay"));
+			Shafts[i]->OnOuterPanelHit.AddUniqueDynamic(this, &AElevator::CheckLocation);
 		}
 	}
 }
 
 
-// ElevatorOuterBox End Overlap Callback Functions
-void AElevator::OnEndOverlap_Implementation(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	Server_CloseDoors();
-}*/
-
 // ElevatorInnerBox Begin Overlap Callback Functions
 // Activates input to open the widget and shows instructions on how to open the widget
-void AElevator::OnOverlapBegin_Implementation(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void AElevator::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	AMPECharacter* Character = Cast<AMPECharacter>(OtherActor);
 
@@ -156,7 +145,6 @@ void AElevator::OnOverlapBegin_Implementation(UPrimitiveComponent* OverlappedCom
 
 		if (IsValid(Character->FloorNumbersWidget))
 		{
-			Character->FloorNumbersWidget->OnFloorButtonClicked.AddUniqueDynamic(this, &AElevator::CallBack_CloseDoors);
 			Character->FloorNumbersWidget->OnOpenButtonClicked.AddUniqueDynamic(this, &AElevator::CallBack_OpenDoors);
 			Character->FloorNumbersWidget->OnFloorButtonClicked.AddUniqueDynamic(this, &AElevator::Server_MoveElevator);
 		}
@@ -165,7 +153,7 @@ void AElevator::OnOverlapBegin_Implementation(UPrimitiveComponent* OverlappedCom
 
 // ElevatorInnerBox End Overlap Callback Functions
 // Deactivates the input to open the widget and removes instructions on how to open the widget
-void AElevator::OnOverlapEnd_Implementation(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+void AElevator::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	AMPECharacter* Character = Cast<AMPECharacter>(OtherActor);
 	if (IsValid(Character))
@@ -182,8 +170,11 @@ void AElevator::Server_MoveElevator_Implementation(AMPECharacter* Character, int
 	ClickedFloor = TargetFloor;
 	if (CurrentFloorindex == ClickedFloor)
 	{
+		CallBack_OpenDoors(Character);
 		return;
 	}
+
+	CallBack_CloseDoors(Character, CurrentFloorindex);
 	FVector ActorLocation = Elevator->GetComponentLocation();
 	ElevatorCurrentLocation = Elevator->GetComponentLocation();
 	
@@ -199,7 +190,7 @@ void AElevator::MoveElevator_Implementation(AMPECharacter* Character, int32 Targ
 	PlayElevatorMoveSound();
 }
 
-void AElevator::HandleElevatorMoveProgress_Implementation(float value)
+void AElevator::HandleElevatorMoveProgress(float value)
 {
 	FVector ElevatorNewLocation = FMath::Lerp(ElevatorCurrentLocation, ElevatorTargetLocation, value);
 	Elevator->SetWorldLocation(ElevatorNewLocation);
@@ -208,14 +199,22 @@ void AElevator::HandleElevatorMoveProgress_Implementation(float value)
 void AElevator::Server_OpenDoors_Implementation(AMPECharacter* Character)
 {
 	DoorsCurveTimeLine.Play();
+	if (!Shafts.IsEmpty())
+	{
+		Shafts[ClickedFloor]->DoorsTimeline.Play();
+	}
 }
 
 void AElevator::Server_CloseDoors_Implementation()
 {
 	DoorsCurveTimeLine.Reverse();
+	if (!Shafts.IsEmpty())
+	{
+		Shafts[CurrentFloorindex]->DoorsTimeline.Reverse();
+	}
 }
 
-void AElevator::HandleElevatorDoorsOpenProgress_Implementation(float value)
+void AElevator::HandleElevatorDoorsOpenProgress(float value)
 {
 	FVector NewRightDoorLocation = FMath::Lerp(RightDoorInitLocation, RightDoorTargetLocation, value);
 	FVector NewLeftDoorLocation = FMath::Lerp(LeftDoorInitLocation, LeftDoorTargetLocation, value);
@@ -225,22 +224,14 @@ void AElevator::HandleElevatorDoorsOpenProgress_Implementation(float value)
 
 void AElevator::CallBack_OpenDoors(AMPECharacter* Character)
 {
-	if (!Shafts.IsEmpty())
-	{
-		Server_OpenDoors(Character);
-		Shafts[ClickedFloor]->DoorsTimeline.Play();
-		PlayDoorsSound();
-	}
+	Server_OpenDoors(Character);
+	PlayDoorsSound();
 }
 
 void AElevator::CallBack_CloseDoors(AMPECharacter* Character, int32 TargetFloor)
 {
-	if (!Shafts.IsEmpty())
-	{
-		Server_CloseDoors();
-		Shafts[CurrentFloorindex]->DoorsTimeline.Reverse();
-		PlayDoorsSound();
-	}
+	Server_CloseDoors();
+	PlayDoorsSound();
 }
 
 void AElevator::CheckLocation(float ShaftLcationZ, AMPECharacter* BaseCharacter)
@@ -248,7 +239,7 @@ void AElevator::CheckLocation(float ShaftLcationZ, AMPECharacter* BaseCharacter)
 	FVector ActorLocation = Elevator->GetComponentLocation();
 	ClickedFloor = int(ShaftLcationZ / FloorHeight);
 	
-	CallBack_CloseDoors(BaseCharacter, CurrentFloorindex);
+	//CallBack_CloseDoors(BaseCharacter, CurrentFloorindex);
 	Server_MoveElevator(BaseCharacter, ClickedFloor);
 }
 

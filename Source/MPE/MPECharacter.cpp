@@ -8,6 +8,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/PlayerController.h"
+#include "PlayerController/MPEPlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/Button.h"
 #include "Kismet/GameplayStatics.h"
@@ -48,7 +49,7 @@ AMPECharacter::AMPECharacter()
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 400.0f; // The camera follows at this distance behind the character	
+	CameraBoom->TargetArmLength = 500.0f; // The camera follows at this distance behind the character	
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
 
 	// Create a follow camera
@@ -136,7 +137,7 @@ void AMPECharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInput
 	// Shows Elevator floors widget Key R 
 	PlayerInputComponent->BindAction("ElevatorWidget", IE_Pressed, this, &AMPECharacter::ShowFloorstNumberWidget);
 	// LineTrace Key E 
-	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AMPECharacter::Server_InteractPressed);
+	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AMPECharacter::InteractPressed);
 	// changes the camera from first person to third person and vice versa Key V
 	PlayerInputComponent->BindAction("ChangeCamera", IE_Pressed, this, &AMPECharacter::CameraSwitch);
 }
@@ -266,8 +267,8 @@ void AMPECharacter::ShowHintWidget(bool bCanShow)
 }
 
 
-// LineTrace Key E 
-void AMPECharacter::Server_InteractPressed_Implementation()
+// LineTrace Key E Server
+void AMPECharacter::InteractPressed_Implementation()
 {
 	FVector Location;
 	FRotator Rotation;
@@ -279,14 +280,18 @@ void AMPECharacter::Server_InteractPressed_Implementation()
 	GetController()->GetPlayerViewPoint(Location, Rotation);
 
 	FVector Start = Location;
-	FVector End = (Start + (Rotation.Vector() * 80));
+	FVector End = (Start + (Rotation.Vector() * 300));
 
 	bHit = UKismetSystemLibrary::LineTraceSingleForObjects(this, Start, End, TraceObjectTypes, false, ActorsToIgnore,
 		EDrawDebugTrace::ForDuration, HitResult, true, FLinearColor::Red, FLinearColor::Green, 3.0f);
 
 	if (bHit)
 	{
-		PlayButtonSound();
+		if (GetLocalRole() != ROLE_SimulatedProxy)
+		{
+			UKismetSystemLibrary::PrintText(this, INVTEXT("Interact"));
+			PlayButtonSound();
+		}
 
 		if (OnOverlaped.IsBound())
 		{

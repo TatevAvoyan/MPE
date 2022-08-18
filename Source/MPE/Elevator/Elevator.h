@@ -25,11 +25,18 @@ protected:
 	virtual void OnConstruction(const FTransform& Transform) override;
 
 protected:
+	UFUNCTION()
+	void TimelinesSetup();
+
+	UFUNCTION(Server, Reliable)
+	void BindsInBeginPlay();
+
+protected:
 	// ElevatorInnerBox Begin/End Overlap Callback Functions
-	UFUNCTION(NetMulticast, Reliable)
+	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-	UFUNCTION(NetMulticast, Reliable)
+	UFUNCTION()
 	void OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	/*// ElevatorOuterBox Begin/End Overlap Callback Functions
@@ -47,8 +54,11 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 	void MoveElevator(class AMPECharacter* Character, int32 TargetFloor);
 
-	UFUNCTION(Server, Reliable)
+	UFUNCTION()
 	void HandleElevatorMoveProgress(float value);
+
+	UFUNCTION()
+	void TimelineFinishedCallback();
 
 public:
 	UPROPERTY(EditDefaultsOnly, Category = "Timeline")
@@ -65,7 +75,7 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 	void Server_CloseDoors();
 
-	UFUNCTION(Server, Reliable)
+	UFUNCTION()
 	void HandleElevatorDoorsOpenProgress(float value);
 
 public:
@@ -161,25 +171,32 @@ public:
 
 protected:
 	// Sounds
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Audio)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sounds")
 	TObjectPtr<class USoundBase> Background_SoundBase;
 
 	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = true))
 	TObjectPtr<class UAudioComponent> Background_Sound_AudioComp;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Audio)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sounds")
 	TObjectPtr<class USoundBase> Elevator_Arrived_SoundBase;
 
 	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = true))
 	TObjectPtr<class UAudioComponent> Elevator_Arrived_AudioComp;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Audio)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sounds")
 	TObjectPtr<class USoundBase> Elevator_Move_SoundBase;
 
 	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = true))
 	TObjectPtr<class UAudioComponent> Elevator_Move_AudioComp;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sounds")
+	TObjectPtr<class USoundBase> Doors_Opening_Closing_SoundBase;
+
+	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = true))
+	TObjectPtr<class UAudioComponent> Doors_Opening_Closing_AudioComp;
+
 private:
+	// Sounds Functions
 	UFUNCTION()
 	void BackgroundSound(bool bCanPlay);
 
@@ -188,17 +205,6 @@ private:
 
 	UFUNCTION()
 	void PlayElevatorArrivedSound();
-
-	UFUNCTION()
-	void TimelineFinishedCallback();
-
-public:
-	// Sounds
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sounds")
-	TObjectPtr<class USoundBase> Doors_Opening_Closing_SoundBase;
-
-	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = true))
-	TObjectPtr<class UAudioComponent> Doors_Opening_Closing_AudioComp;
 
 	UFUNCTION()
 	void PlayDoorsSound();

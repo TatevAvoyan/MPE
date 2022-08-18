@@ -4,6 +4,7 @@
 #include "ElevatorWidget.h"
 #include "Components/BoxComponent.h"
 #include "Components/AudioComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 
 AShaft::AShaft()
@@ -33,16 +34,8 @@ void AShaft::BeginPlay()
 {
 	Super::BeginPlay();
 
-	ShaftInnerBox->OnComponentBeginOverlap.AddDynamic(this, &AShaft::OnComponentBeginOverlap);
-	ShaftInnerBox->OnComponentEndOverlap.AddDynamic(this, &AShaft::OnComponentEndOverlap);
-
-	if (DoorsCurve)
-	{
-		FOnTimelineFloat TimeLineProgress{};
-		TimeLineProgress.BindUFunction(this, FName("HandleProgress"));
-
-		this->DoorsTimeline.AddInterpFloat(DoorsCurve, TimeLineProgress);
-	}
+	BindsInBeginPlay();
+	TimelinesSetup();
 }
 
 void AShaft::Tick(float DeltaTime)
@@ -66,17 +59,18 @@ void AShaft::OnConstruction(const FTransform& Transform)
 	ShaftInnerBox->SetRelativeLocation(ShaftBoxInitLocation);
 }
 
-void AShaft::OutsideOpenDoors_Implementation(AMPECharacter* BaseCharacter)
+// Server
+void AShaft::HitClallback_Implementation(AMPECharacter* BaseCharacter)
 {
 	ShaftLocation = GetActorLocation().Z;
-
+	UKismetSystemLibrary::PrintText(this, INVTEXT("AShaft::HitCallback"));
 	if (OnOuterPanelHit.IsBound())
 	{
 		OnOuterPanelHit.Broadcast(ShaftLocation, BaseCharacter);
 	}
 }
 
-void AShaft::HandleProgress_Implementation(float value)
+void AShaft::HandleProgress(float value)
 {
 	FVector NewShaftRightDoorLocation = FMath::Lerp(ShaftRightDoorInitLocation, ShaftRightDoorTargetLocation, value);
 	FVector NewShaftLeftDoorLocation = FMath::Lerp(ShaftLeftDoorInitLocation, ShaftLeftDoorTargetLocation, value);
@@ -84,20 +78,37 @@ void AShaft::HandleProgress_Implementation(float value)
 	ShaftDoorLeft->SetRelativeLocation(NewShaftLeftDoorLocation);
 }
 
-void AShaft::OnComponentBeginOverlap_Implementation(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void AShaft::TimelinesSetup()
 {
-	CharacterBase = Cast<AMPECharacter>(OtherActor);
-	if (IsValid(CharacterBase))
+	if (DoorsCurve)
 	{
-		CharacterBase->OnOverlaped.AddUniqueDynamic(this, &AShaft::OutsideOpenDoors);
+		FOnTimelineFloat TimeLineProgress{};
+		TimeLineProgress.BindUFunction(this, FName("HandleProgress"));
+
+		this->DoorsTimeline.AddInterpFloat(DoorsCurve, TimeLineProgress);
 	}
 }
 
-void AShaft::OnComponentEndOverlap_Implementation(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+void AShaft::BindsInBeginPlay_Implementation()
+{
+	ShaftInnerBox->OnComponentBeginOverlap.AddDynamic(this, &AShaft::OnComponentBeginOverlap);
+	ShaftInnerBox->OnComponentEndOverlap.AddDynamic(this, &AShaft::OnComponentEndOverlap);
+}
+
+void AShaft::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	CharacterBase = Cast<AMPECharacter>(OtherActor);
 	if (IsValid(CharacterBase))
 	{
-		CharacterBase->OnOverlaped.RemoveDynamic(this, &AShaft::OutsideOpenDoors);
+		CharacterBase->OnOverlaped.AddUniqueDynamic(this, &AShaft::HitClallback);
+	}
+}
+
+void AShaft::OnComponentEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	CharacterBase = Cast<AMPECharacter>(OtherActor);
+	if (IsValid(CharacterBase))
+	{
+		CharacterBase->OnOverlaped.RemoveDynamic(this, &AShaft::HitClallback);
 	}
 }
