@@ -146,7 +146,7 @@ void AElevator::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor*
 		if (IsValid(Character->FloorNumbersWidget))
 		{
 			Character->FloorNumbersWidget->OnOpenButtonClicked.AddUniqueDynamic(this, &AElevator::CallBack_OpenDoors);
-			Character->FloorNumbersWidget->OnFloorButtonClicked.AddUniqueDynamic(this, &AElevator::Server_MoveElevator);
+			Character->FloorNumbersWidget->OnFloorButtonClicked.AddUniqueDynamic(this, &AElevator::CallBack_MoveElevator);
 		}
 	}
 }
@@ -164,29 +164,30 @@ void AElevator::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* O
 	}
 }
 
-// Moves the elevator using the Timeline
-void AElevator::Server_MoveElevator_Implementation(AMPECharacter* Character, int32 TargetFloor)
+// Moves the elevator using the Timeline NetMulticast
+void AElevator::Server_MoveElevator_Implementation(int32 TargetFloor)
 {
 	ClickedFloor = TargetFloor;
 	if (CurrentFloorindex == ClickedFloor)
 	{
-		CallBack_OpenDoors(Character);
+		CallBack_OpenDoors();
 		return;
 	}
 
-	CallBack_CloseDoors(Character, CurrentFloorindex);
+	CallBack_CloseDoors(CurrentFloorindex);
 	FVector ActorLocation = Elevator->GetComponentLocation();
 	ElevatorCurrentLocation = Elevator->GetComponentLocation();
 	
 	ActorLocation.Z = FloorHeight * TargetFloor + 0.2f;
 	ElevatorTargetLocation = ActorLocation;
-	MoveElevator(Character, TargetFloor);
-}
 
-void AElevator::MoveElevator_Implementation(AMPECharacter* Character, int32 TargetFloor)
-{
 	ElevatorCurveTimeLine.Play();
 	ElevatorCurveTimeLine.SetNewTime(0);
+}
+
+void AElevator::CallBack_MoveElevator(int32 TargetFloor)
+{
+	Server_MoveElevator(TargetFloor);
 	PlayElevatorMoveSound();
 }
 
@@ -196,7 +197,7 @@ void AElevator::HandleElevatorMoveProgress(float value)
 	Elevator->SetWorldLocation(ElevatorNewLocation);
 }
 
-void AElevator::Server_OpenDoors_Implementation(AMPECharacter* Character)
+void AElevator::Server_OpenDoors_Implementation()
 {
 	DoorsCurveTimeLine.Play();
 	if (!Shafts.IsEmpty())
@@ -214,6 +215,18 @@ void AElevator::Server_CloseDoors_Implementation()
 	}
 }
 
+void AElevator::CallBack_OpenDoors()
+{
+	Server_OpenDoors();
+	PlayDoorsSound();
+}
+
+void AElevator::CallBack_CloseDoors(int32 TargetFloor)
+{
+	Server_CloseDoors();
+	PlayDoorsSound();
+}
+
 void AElevator::HandleElevatorDoorsOpenProgress(float value)
 {
 	FVector NewRightDoorLocation = FMath::Lerp(RightDoorInitLocation, RightDoorTargetLocation, value);
@@ -222,25 +235,13 @@ void AElevator::HandleElevatorDoorsOpenProgress(float value)
 	ElevatorDoorLeft->SetRelativeLocation(NewLeftDoorLocation);
 }
 
-void AElevator::CallBack_OpenDoors(AMPECharacter* Character)
-{
-	Server_OpenDoors(Character);
-	PlayDoorsSound();
-}
-
-void AElevator::CallBack_CloseDoors(AMPECharacter* Character, int32 TargetFloor)
-{
-	Server_CloseDoors();
-	PlayDoorsSound();
-}
-
-void AElevator::CheckLocation(float ShaftLcationZ, AMPECharacter* BaseCharacter)
+void AElevator::CheckLocation(float ShaftLcationZ)
 {
 	FVector ActorLocation = Elevator->GetComponentLocation();
 	ClickedFloor = int(ShaftLcationZ / FloorHeight);
 	
 	//CallBack_CloseDoors(BaseCharacter, CurrentFloorindex);
-	Server_MoveElevator(BaseCharacter, ClickedFloor);
+	CallBack_MoveElevator(ClickedFloor);
 }
 
 void AElevator::BackgroundSound(bool bCanPlay)
@@ -301,10 +302,9 @@ void AElevator::TimelineFinishedCallback()
 	CurrentFloorindex = ClickedFloor;
 	PlayElevatorArrivedSound();
 
-	DoorsCurveTimeLine.Play();
 	if (!Shafts.IsEmpty())
 	{
-		Shafts[ClickedFloor]->DoorsTimeline.Play();
+		CallBack_OpenDoors();
 		PlayDoorsSound();
 	}
 

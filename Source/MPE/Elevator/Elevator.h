@@ -48,11 +48,11 @@ protected:
 
 protected:
 	// Elevator move functions & Variables
-	UFUNCTION(Server, Reliable)
-	void Server_MoveElevator(class AMPECharacter* Character, int32 TargetFloor);
-	
 	UFUNCTION(NetMulticast, Reliable)
-	void MoveElevator(class AMPECharacter* Character, int32 TargetFloor);
+	void Server_MoveElevator(int32 TargetFloor);
+	
+	UFUNCTION()
+	void CallBack_MoveElevator(int32 TargetFloor);
 
 	UFUNCTION()
 	void HandleElevatorMoveProgress(float value);
@@ -70,7 +70,7 @@ public:
 protected:
 	// Elevator Doors Open/Close functions & Variables
 	UFUNCTION(NetMulticast, Reliable)
-	void Server_OpenDoors(class AMPECharacter* Character);
+	void Server_OpenDoors();
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Server_CloseDoors();
@@ -80,10 +80,10 @@ protected:
 
 public:
 	UFUNCTION()
-	void CallBack_OpenDoors(class AMPECharacter* Character);
+	void CallBack_OpenDoors();
 
 	UFUNCTION()
-	void CallBack_CloseDoors(AMPECharacter* Character, int32 TargetFloor);
+	void CallBack_CloseDoors(int32 TargetFloor);
 
 	UPROPERTY()
 	FTimeline DoorsCurveTimeLine;
@@ -167,7 +167,7 @@ public:
 	float FloorHeight = 300.f;
 
 	UFUNCTION()
-	void CheckLocation(float ShaftLcationZ, AMPECharacter* BaseCharacter);
+	void CheckLocation(float ShaftLcationZ);
 
 protected:
 	// Sounds

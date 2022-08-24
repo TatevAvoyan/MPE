@@ -4,7 +4,7 @@
 #include "Elevator.h"
 #include "Shaft.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnOuterPanelHit, float, fHitFloorLoaction, AMPECharacter*, BaseCharacter);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnOuterPanelHit, float, fHitFloorLoaction);
 
 
 UCLASS()
@@ -28,7 +28,7 @@ protected:
 private:
 	// 
 	UFUNCTION(Server, Reliable)
-	void HitClallback(class AMPECharacter* BaseCharacter);
+	void HitClallback();
 
 	UFUNCTION(Server, Reliable)
 	void BindsInBeginPlay();

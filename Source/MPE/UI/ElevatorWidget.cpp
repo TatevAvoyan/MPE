@@ -83,7 +83,7 @@ void UElevatorWidget::Server_ButtonClicked_Implementation(const UButton* Current
 
 	if (OnFloorButtonClicked.IsBound())
 	{
-		OnFloorButtonClicked.Broadcast(MyCharacter, --ButtonNumber);
+		OnFloorButtonClicked.Broadcast(--ButtonNumber);
 	}
 }
 
@@ -92,7 +92,7 @@ void UElevatorWidget::Server_OpenDoorsOpenButtonClicked_Implementation()
 	UKismetSystemLibrary::PrintString(this, "OpenDoorsOpenButtonClicked");
 	if (OnOpenButtonClicked.IsBound())
 	{
-		OnOpenButtonClicked.Broadcast(MyCharacter);
+		OnOpenButtonClicked.Broadcast();
 	}
 
 	Client_DeactivateMouse_RemoveWidget();

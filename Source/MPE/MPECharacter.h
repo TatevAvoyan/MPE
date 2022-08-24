@@ -4,7 +4,7 @@
 #include "GameFramework/Character.h"
 #include "MPECharacter.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnOverlaped, AMPECharacter*, MyCharacter);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnOverlaped);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEnterKeyb);
 

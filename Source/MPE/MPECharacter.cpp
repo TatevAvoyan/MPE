@@ -295,7 +295,7 @@ void AMPECharacter::InteractPressed_Implementation()
 
 		if (OnOverlaped.IsBound())
 		{
-			OnOverlaped.Broadcast(this);
+			OnOverlaped.Broadcast();
 		}
 	}
 }

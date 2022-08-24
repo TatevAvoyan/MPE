@@ -60,13 +60,13 @@ void AShaft::OnConstruction(const FTransform& Transform)
 }
 
 // Server
-void AShaft::HitClallback_Implementation(AMPECharacter* BaseCharacter)
+void AShaft::HitClallback_Implementation()
 {
 	ShaftLocation = GetActorLocation().Z;
 	UKismetSystemLibrary::PrintText(this, INVTEXT("AShaft::HitCallback"));
 	if (OnOuterPanelHit.IsBound())
 	{
-		OnOuterPanelHit.Broadcast(ShaftLocation, BaseCharacter);
+		OnOuterPanelHit.Broadcast(ShaftLocation);
 	}
 }
 

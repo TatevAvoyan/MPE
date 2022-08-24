@@ -7,8 +7,8 @@
 #include "Button/GetButton.h"
 #include "ElevatorWidget.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnOpenClicked, class AMPECharacter*, Character);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnFloorButtonClicked, class AMPECharacter*, Character, int32, ClickedButtonNumber);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnOpenClicked);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFloorButtonClicked, int32, ClickedButtonNumber);
 
 class UButton;
 class AShaft;
