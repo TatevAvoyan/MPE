@@ -287,7 +287,7 @@ void AMPECharacter::InteractPressed_Implementation()
 
 	if (bHit)
 	{
-		if (GetLocalRole() != ROLE_SimulatedProxy)
+		if (GetLocalRole() == ROLE_AutonomousProxy || GetLocalRole() == ROLE_Authority)
 		{
 			UKismetSystemLibrary::PrintText(this, INVTEXT("Interact"));
 			PlayButtonSound();

@@ -16,70 +16,63 @@ void UElevatorWidget::NativeOnInitialized()
 
 	if (IsValid(OpenShaftDoorsButton))
 	{
-		OpenShaftDoorsButton->OnClicked.AddUniqueDynamic(this, &UElevatorWidget::Client_OpenDoorsOpenButtonClicked);
+		OpenShaftDoorsButton->OnClicked.AddUniqueDynamic(this, &UElevatorWidget::OpenDoorsOpenButtonClicked);
 	}
 
 	if (IsValid(Button_1))
 	{
-		Button_1->ButtonPresssedEventReturnButton.AddUniqueDynamic(this, &UElevatorWidget::Server_ButtonClicked);
+		Button_1->ButtonPresssedEventReturnButton.AddUniqueDynamic(this, &UElevatorWidget::ButtonClicked);
 	}
 
 	if (IsValid(Button_2))
 	{
-		Button_2->ButtonPresssedEventReturnButton.AddUniqueDynamic(this, &UElevatorWidget::Server_ButtonClicked);
+		Button_2->ButtonPresssedEventReturnButton.AddUniqueDynamic(this, &UElevatorWidget::ButtonClicked);
 	}
 
 	if (IsValid(Button_3))
 	{
-		Button_3->ButtonPresssedEventReturnButton.AddUniqueDynamic(this, &UElevatorWidget::Server_ButtonClicked);
+		Button_3->ButtonPresssedEventReturnButton.AddUniqueDynamic(this, &UElevatorWidget::ButtonClicked);
 	}
 
 	if (IsValid(Button_4))
 	{
-		Button_4->ButtonPresssedEventReturnButton.AddUniqueDynamic(this, &UElevatorWidget::Server_ButtonClicked);
+		Button_4->ButtonPresssedEventReturnButton.AddUniqueDynamic(this, &UElevatorWidget::ButtonClicked);
 	}
 
 	if (IsValid(Button_5))
 	{
-		Button_5->ButtonPresssedEventReturnButton.AddUniqueDynamic(this, &UElevatorWidget::Server_ButtonClicked);
+		Button_5->ButtonPresssedEventReturnButton.AddUniqueDynamic(this, &UElevatorWidget::ButtonClicked);
 	}
 
 	if (IsValid(Button_6))
 	{
-		Button_6->ButtonPresssedEventReturnButton.AddUniqueDynamic(this, &UElevatorWidget::Server_ButtonClicked);
+		Button_6->ButtonPresssedEventReturnButton.AddUniqueDynamic(this, &UElevatorWidget::ButtonClicked);
 	}
 
 	if (IsValid(Button_7))
 	{
-		Button_7->ButtonPresssedEventReturnButton.AddUniqueDynamic(this, &UElevatorWidget::Server_ButtonClicked);
+		Button_7->ButtonPresssedEventReturnButton.AddUniqueDynamic(this, &UElevatorWidget::ButtonClicked);
 	}
 
 	if (IsValid(Button_8))
 	{
-		Button_8->ButtonPresssedEventReturnButton.AddUniqueDynamic(this, &UElevatorWidget::Server_ButtonClicked);
+		Button_8->ButtonPresssedEventReturnButton.AddUniqueDynamic(this, &UElevatorWidget::ButtonClicked);
 	}
 }
 
-
-void UElevatorWidget::Client_OpenDoorsOpenButtonClicked_Implementation()
-{
-	Server_OpenDoorsOpenButtonClicked();
-}
-
-
-void UElevatorWidget::Server_ButtonClicked_Implementation(const UButton* CurrentButton)
+void UElevatorWidget::ButtonClicked(const UButton* CurrentButton)
 {
 	UKismetSystemLibrary::PrintString(this, "ButtonClicked");
 	Split_Conv_String(CurrentButton);
 
-	Client_DeactivateMouse_RemoveWidget();
+	DeactivateMouse_RemoveWidget();
 
 	if (IsValid(MyCharacter))
 	{
 		MyCharacter->PlayButtonSound();
 	}
 
-	Client_HintWidget_AddToViewport();
+	HintWidget_AddToViewport();
 
 	if (OnFloorButtonClicked.IsBound())
 	{
@@ -87,7 +80,7 @@ void UElevatorWidget::Server_ButtonClicked_Implementation(const UButton* Current
 	}
 }
 
-void UElevatorWidget::Server_OpenDoorsOpenButtonClicked_Implementation()
+void UElevatorWidget::OpenDoorsOpenButtonClicked()
 {
 	UKismetSystemLibrary::PrintString(this, "OpenDoorsOpenButtonClicked");
 	if (OnOpenButtonClicked.IsBound())
@@ -95,14 +88,14 @@ void UElevatorWidget::Server_OpenDoorsOpenButtonClicked_Implementation()
 		OnOpenButtonClicked.Broadcast();
 	}
 
-	Client_DeactivateMouse_RemoveWidget();
+	DeactivateMouse_RemoveWidget();
 
 	if (IsValid(MyCharacter))
 	{
 		MyCharacter->PlayButtonSound();
 	}
 
-	Client_HintWidget_AddToViewport();
+	HintWidget_AddToViewport();
 }
 
 void UElevatorWidget::Split_Conv_String(const UButton* CurrentButton)
@@ -113,8 +106,7 @@ void UElevatorWidget::Split_Conv_String(const UButton* CurrentButton)
 	ButtonNumber = UKismetStringLibrary::Conv_StringToInt(Right);
 }
 
-
-void UElevatorWidget::Client_DeactivateMouse_RemoveWidget()
+void UElevatorWidget::DeactivateMouse_RemoveWidget()
 {
 	// DeActivated Mouse Cursor
 	if (PlayerController)
@@ -127,7 +119,7 @@ void UElevatorWidget::Client_DeactivateMouse_RemoveWidget()
 	RemoveFromViewport();
 }
 
-void UElevatorWidget::Client_HintWidget_AddToViewport()
+void UElevatorWidget::HintWidget_AddToViewport()
 {
 	// Adding Hint Widget to Viewport
 	if (IsValid(MyCharacter))

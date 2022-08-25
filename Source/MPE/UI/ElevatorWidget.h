@@ -55,20 +55,17 @@ public:
 	UFUNCTION()
 	void Split_Conv_String(const class UButton* CurrentButton);
 
-	UFUNCTION(Client, Unreliable)
-	void Client_OpenDoorsOpenButtonClicked();
-
-	UFUNCTION(NetMulticast, Unreliable)
-	void Server_ButtonClicked(const class UButton* CurrentButton);
-
-	UFUNCTION(NetMulticast, Unreliable)
-	void Server_OpenDoorsOpenButtonClicked();
+	UFUNCTION()
+	void ButtonClicked(const class UButton* CurrentButton);
 
 	UFUNCTION()
-	void Client_DeactivateMouse_RemoveWidget();
+	void OpenDoorsOpenButtonClicked();
 
 	UFUNCTION()
-	void Client_HintWidget_AddToViewport();
+	void DeactivateMouse_RemoveWidget();
+
+	UFUNCTION()
+	void HintWidget_AddToViewport();
 
 	UPROPERTY(BlueprintAssignable)
 	FOnOpenClicked OnOpenButtonClicked;
